@@ -6,14 +6,14 @@
 <title>Talib al-ʿIlm</title>
 <meta name="description" content="An interactive roadmap of the classical Islamic sciences.">
 <meta name="theme-color" content="#000000">
-<link rel="icon" type="image/jpeg" href="https://i.imgur.com/JvRTr7p.jpeg">
-<link rel="apple-touch-icon" href="https://i.imgur.com/JvRTr7p.jpeg">
+<link rel="icon" type="image/png" href="https://i.imgur.com/STz3I9W.png">
+<link rel="apple-touch-icon" href="https://i.imgur.com/STz3I9W.png">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════════
    TALIB AL-ʿILM — OLED PRESENTATION
-   Horizontal slide deck. No traditional scrolling.
-   Navigation: wheel / trackpad swipe / touch swipe / keys.
+   Horizontal slide deck · no traditional scrolling.
+   Navigation: wheel / trackpad swipe / touch swipe / keys / dots.
 ════════════════════════════════════════════════════════════ */
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -25,6 +25,11 @@
   --dim:#6a6a72;
   --faint:#262629;
   --ease:cubic-bezier(.22,1,.36,1);
+  /* roadmap madhab palette (used for Feature 03 + flowers) */
+  --hanbali:#81c784;
+  --shafi:#64b5f6;
+  --maliki:#ce93d8;
+  --hanafi:#ff8a65;
 }
 
 html,body{height:100%}
@@ -36,214 +41,193 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ────────────────────────────────────────────────────────────
-   DECK + SLIDES
-   Each slide is exactly one viewport. The deck shifts on X.
-──────────────────────────────────────────────────────────── */
-#deck{
-  display:flex;
-  width:100%;
-  height:100dvh;                   /* true mobile viewport height */
-  transition:transform .85s var(--ease);
-  will-change:transform;
-}
+/* ── DECK + SLIDES ─────────────────────────────────────────── */
+#deck{display:flex;width:100%;height:100dvh;
+  transition:transform .85s var(--ease);will-change:transform;
+  backface-visibility:hidden}
 .slide{
-  flex:0 0 100%;
-  width:100vw;
-  height:100dvh;
-  position:relative;
-  display:flex;
-  align-items:center;              /* vertical centering */
-  justify-content:center;          /* horizontal centering */
+  flex:0 0 100%;width:100vw;height:100dvh;position:relative;
+  display:flex;align-items:center;justify-content:center;
   padding:max(28px,env(safe-area-inset-top)) clamp(24px,6vw,72px) max(28px,env(safe-area-inset-bottom));
+  overflow:hidden;
 }
-/* Inner column keeps everything perfectly centered & width-capped */
 .inner{
-  width:100%;
-  max-width:640px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
-  margin: 0 auto;                  /* Ensures absolute horizontal centering inside the slide container */
+  width:100%;max-width:640px;margin:0 auto;position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
 }
-/* Ambient halo so pure black never reads flat */
 .slide::after{
-  content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;
-  background:radial-gradient(ellipse 55% 50% at 50% 48%,rgba(212,175,55,.055) 0%,transparent 70%);
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 55% 50% at 50% 48%,rgba(212,175,55,.05) 0%,transparent 70%);
   opacity:0;transition:opacity 1s ease;
 }
 .slide.active::after{opacity:1}
 
-/* Content entrance per active slide */
+/* Content entrance */
 .anim-in{opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .slide.active .anim-in{opacity:1;transform:none}
 .slide.active .anim-in.d1{transition-delay:.10s}
 .slide.active .anim-in.d2{transition-delay:.22s}
 .slide.active .anim-in.d3{transition-delay:.34s}
+.slide.active .anim-in.d4{transition-delay:.46s}
 
-/* ────────────────────────────────────────────────────────────
-   SLIDE 1 — INTRO, perfectly centered profile image with astronomical astrolabe effect
-──────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   ORGANIC TREE BRANCH — grows from a slide corner, ends in a
+   flower. Colour + corner differ per slide (set inline / by class).
+   Draws on when the slide becomes active.
+════════════════════════════════════════════════════════════ */
+.branch{
+  position:absolute;width:clamp(150px,32vw,300px);height:clamp(150px,32vw,300px);
+  z-index:1;pointer-events:none;overflow:visible;
+}
+/* base shape grows from bottom-left → flip per corner so it always
+   reaches inward from the page corner it is anchored to */
+.branch.tl{top:0;left:0;transform:scaleY(-1)}
+.branch.tr{top:0;right:0;transform:scale(-1,-1)}
+.branch.bl{bottom:0;left:0}
+.branch.br{bottom:0;right:0;transform:scaleX(-1)}
+
+.branch .stem{
+  fill:none;stroke:var(--flower);stroke-width:1.6;stroke-linecap:round;
+  opacity:.55;pathLength:1;stroke-dasharray:1;stroke-dashoffset:1;
+}
+.branch .leaf{fill:var(--flower);opacity:0}
+.branch .petal{fill:var(--flower)}
+.branch .petal-core{fill:#fff;opacity:.85}
+.branch .flower{opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(.2);
+  filter:drop-shadow(0 0 6px var(--flower))}
+
+.slide.active .branch .stem{animation:stemGrow 1.5s var(--ease) forwards}
+.slide.active .branch .leaf{animation:leafIn .6s var(--ease) forwards}
+.slide.active .branch .leaf.l2{animation-delay:.7s}
+.slide.active .branch .leaf.l1{animation-delay:.5s}
+.slide.active .branch .flower{animation:bloom .9s var(--ease) 1.05s forwards}
+@keyframes stemGrow{to{stroke-dashoffset:0}}
+@keyframes leafIn{to{opacity:.7}}
+@keyframes bloom{to{opacity:1;transform:scale(1)}}
+
+/* ── INTRO — centered profile with restored ripple circles ──── */
 .emblem{
-  position:relative;
-  width:clamp(140px,28vw,200px);
-  height:clamp(140px,28vw,200px);
-  margin:0 auto clamp(28px,4.5vw,44px) auto; /* Centers the block horizontally within parent */
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  position:relative;width:clamp(140px,28vw,200px);height:clamp(140px,28vw,200px);
+  margin:0 auto clamp(28px,4.5vw,44px) auto;display:flex;align-items:center;justify-content:center;
 }
 .profile-container{
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  overflow:hidden;
-  position:relative;
-  z-index:2;
-  /* Removed border and box-shadow completely as requested in reference to image_74de26.png */
+  width:100%;height:100%;border-radius:50%;overflow:hidden;position:relative;z-index:2;
 }
 .profile-container img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  /* Slightly scale up to crop out the empty black framing of the tree art */
-  transform:scale(1.18);
-  transform-origin:center center;
+  width:100%;height:100%;object-fit:cover;
+  object-position:center 50%;
+  transform:scale(1.18);transform-origin:center center;
 }
-
+/* 3D sphere shading: soft light on the upper-left, a curved shadow
+   crescent sweeping down the right edge → adds depth and balances
+   the composition without re-cropping the art. */
+.profile-container::after{
+  content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:3;
+  background:
+    radial-gradient(circle at 33% 30%, rgba(255,255,255,.07) 0%, transparent 46%),
+    radial-gradient(circle at 80% 64%, rgba(0,0,0,.55) 0%, rgba(0,0,0,.22) 34%, transparent 62%);
+  box-shadow:
+    inset -16px -14px 38px rgba(0,0,0,.55),
+    inset 14px 12px 34px rgba(212,175,55,.05);
+}
 /* Ambient Golden breathing glow */
 .glow-aura{
-  position:absolute;
-  width:110%;
-  height:110%;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%);
-  filter:blur(16px);
+  position:absolute;width:124%;height:124%;border-radius:50%;
+  /* soft multi-stop gradient = the blur look, baked in (no filter to rasterize) */
+  background:radial-gradient(circle,
+    rgba(212,175,55,0.20) 0%,
+    rgba(212,175,55,0.10) 34%,
+    rgba(212,175,55,0.03) 58%,
+    transparent 74%);
   animation:breathe 6s ease-in-out infinite alternate;
-  z-index:1;
-  pointer-events:none;
+  z-index:1;pointer-events:none;
 }
-
 /* Celestial astrolabe thin orbital rings */
-.orbit-ring{
-  position:absolute;
-  border-radius:50%;
-  border:0.75px dashed rgba(212, 175, 55, 0.16);
-  z-index:1;
-  pointer-events:none;
-}
-.orbit-outer{
-  width:138%;
-  height:138%;
-  animation:rotateClockwise 35s linear infinite;
-}
-.orbit-inner{
-  width:118%;
-  height:118%;
-  border-style:dotted;
-  border-width:1px;
-  border-color:rgba(212, 175, 55, 0.08);
-  animation:rotateCounterClockwise 28s linear infinite;
-}
+.orbit-ring{position:absolute;border-radius:50%;z-index:1;pointer-events:none;
+  will-change:transform}
+.orbit-outer{width:138%;height:138%;border:0.75px dashed rgba(212,175,55,0.16);
+  animation:rotateClockwise 35s linear infinite}
+.orbit-inner{width:118%;height:118%;border:1px dotted rgba(212,175,55,0.08);
+  animation:rotateCounterClockwise 28s linear infinite}
+/* Floating scholastic light embers (particles) — box-shadow glow is far
+   cheaper than an animated drop-shadow filter */
+.dust{position:absolute;width:3px;height:3px;background:var(--gold);border-radius:50%;
+  opacity:0;z-index:1;pointer-events:none;will-change:transform,opacity;
+  box-shadow:0 0 4px 1px rgba(212,175,55,.7)}
+.dust-1{left:22%;top:80%;animation:floatDust 7s infinite ease-in-out}
+.dust-2{left:78%;top:70%;animation:floatDust 9s infinite ease-in-out 1.8s}
+.dust-3{left:45%;top:90%;animation:floatDust 8s infinite ease-in-out 3.2s}
+.dust-4{left:62%;top:85%;animation:floatDust 6s infinite ease-in-out 4.6s}
+@keyframes breathe{0%{transform:scale(0.92);opacity:0.4}100%{transform:scale(1.08);opacity:0.8}}
+@keyframes rotateClockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes rotateCounterClockwise{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+@keyframes floatDust{0%{transform:translateY(0) scale(0.5);opacity:0}30%{opacity:0.7}70%{opacity:0.3}100%{transform:translateY(-70px) scale(1.2);opacity:0}}
+/* pause intro motion AND release compositor layers while off-screen */
+.slide:not(.active) .glow-aura,
+.slide:not(.active) .orbit-ring,
+.slide:not(.active) .dust{animation-play-state:paused;will-change:auto}
 
-/* Floating scholastic light embers (particles) */
-.dust {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background: var(--gold);
-  border-radius: 50%;
-  opacity: 0;
-  z-index: 1;
-  pointer-events: none;
-  filter: drop-shadow(0 0 3px var(--gold));
-}
-.dust-1 { left: 22%; top: 80%; animation: floatDust 7s infinite ease-in-out; }
-.dust-2 { left: 78%; top: 70%; animation: floatDust 9s infinite ease-in-out 1.8s; }
-.dust-3 { left: 45%; top: 90%; animation: floatDust 8s infinite ease-in-out 3.2s; }
-.dust-4 { left: 62%; top: 85%; animation: floatDust 6s infinite ease-in-out 4.6s; }
-
-@keyframes breathe {
-  0% { transform: scale(0.92); opacity: 0.4; }
-  100% { transform: scale(1.08); opacity: 0.8; }
-}
-@keyframes rotateClockwise {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-@keyframes rotateCounterClockwise {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
-}
-@keyframes floatDust {
-  0% { transform: translateY(0) scale(0.5); opacity: 0; }
-  30% { opacity: 0.7; }
-  70% { opacity: 0.3; }
-  100% { transform: translateY(-70px) scale(1.2); opacity: 0; }
-}
 
 .intro-title{font-family:'Cinzel',serif;font-weight:500;
-  font-size:clamp(28px,6vw,50px);letter-spacing:.1em;line-height:1.1;margin-bottom:18px}
-.intro-sub{font-size:clamp(10px,2vw,12px);letter-spacing:.26em;text-transform:uppercase;color:var(--dim);line-height:1.5}
+  font-size:clamp(28px,6vw,50px);letter-spacing:.1em;line-height:1.1;margin-bottom:14px}
+.intro-sub{font-size:clamp(10px,2vw,12px);letter-spacing:.26em;text-transform:uppercase;
+  color:var(--dim);line-height:1.6}
+/* bigger إن شاء الله, placed under the roadmap subtitle */
+.intro-insha{font-family:'Noto Naskh Arabic',serif;
+  font-size:clamp(26px,6vw,46px);line-height:1.4;color:var(--gold);
+  margin-top:clamp(20px,4vw,30px);text-shadow:0 0 30px rgba(212,175,55,.3);direction:rtl}
 
-/* ────────────────────────────────────────────────────────────
-   FEATURE SLIDES
-──────────────────────────────────────────────────────────── */
-.index{font-size:clamp(10px,1.8vw,12px);letter-spacing:.4em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:clamp(22px,4.5vw,38px);opacity:.7}
+/* ── FEATURE SLIDES ────────────────────────────────────────── */
+/* heading: entrance animation (not typed) */
 .f-title{font-family:'Cinzel',serif;font-weight:500;
   font-size:clamp(24px,5vw,42px);letter-spacing:.03em;line-height:1.25;
   margin-bottom:clamp(18px,3.5vw,28px)}
 .f-text{font-size:clamp(13px,2.4vw,16.5px);line-height:1.85;font-weight:300;
   color:var(--ink);max-width:540px}
+/* focusable headings receive programmatic focus for a11y — no visible box */
+.intro-title,.final-title,.f-title{outline:none}
+.intro-title:focus,.final-title:focus,.f-title:focus,
+.intro-title:focus-visible,.final-title:focus-visible,.f-title:focus-visible{outline:none}
 
-/* ────────────────────────────────────────────────────────────
-   TYPEWRITER CAROUSEL FIX
-   Based on image_74dded.png, the cursor is dynamically bound to the letters 
-   directly without any extra spacing or wrapping errors.
-──────────────────────────────────────────────────────────── */
-.tw .c{
-  opacity:0;
-  display:inline;
-  white-space:pre-wrap;
-}
+/* Typewriter (paragraphs only): words wrap as units; characters are
+   pre-laid (stable height → no reflow/clipping) and revealed by opacity.
+   Arabic is kept as ONE unit so its letters stay joined. */
+.tw .word{white-space:nowrap;display:inline}
+.tw .c{opacity:0;transition:opacity .05s linear}
 .tw .c.on{opacity:1}
+.tw .ar{font-family:'Noto Naskh Arabic',serif;font-size:1.15em;direction:rtl;unicode-bidi:isolate}
+.tw .c.cursor{position:relative}
+.tw .c.cursor::after{content:'';position:absolute;right:-3px;top:8%;height:84%;width:2px;
+  background:var(--gold);border-radius:1px;animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
 
-/* Seamless cursor attachment using dynamic box-shadow instead of custom spacing nodes */
-.c.typing-active{
-  box-shadow:2px 0 0 0 var(--gold);
-  animation:blink 1s step-end infinite;
-}
-@keyframes blink{50%{box-shadow:2px 0 0 0 transparent}}
-
-/* GOLD lives INSIDE the glyphs (static gradient → no per-frame repaint) */
-.gold{
-  background:linear-gradient(135deg,#f6e27a 0%,#D4AF37 48%,#a9831f 100%);
+/* GOLD inside the glyphs (static → no per-frame repaint) */
+.gold{background:linear-gradient(135deg,#f6e27a 0%,#D4AF37 48%,#a9831f 100%);
+  background-size:100% 100%;background-position:0 0;
   -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;color:transparent;font-weight:500;
-}
+  -webkit-text-fill-color:transparent;color:transparent;font-weight:500}
+.gold.sweep{background-size:220% 100%;animation:goldSweep 1.15s ease forwards}
+@keyframes goldSweep{0%{background-position:210% 0}100%{background-position:0 0}}
 
-/* ────────────────────────────────────────────────────────────
-   FINAL — Hold-to-Action with Beautiful Hamdalah
-──────────────────────────────────────────────────────────── */
+/* ── FINAL — Hold-to-Action ────────────────────────────────── */
 .seal{font-family:'Noto Naskh Arabic',serif;font-size:clamp(32px,6vw,44px);
-  color:var(--gold);margin-bottom:22px;letter-spacing:0.02em}
+  color:var(--gold);margin-bottom:22px;letter-spacing:.02em;direction:rtl}
 .final-title{font-family:'Cinzel',serif;font-weight:500;
   font-size:clamp(26px,5vw,40px);letter-spacing:.05em;margin-bottom:14px}
 .final-sub{font-size:clamp(12px,2.2vw,15px);color:var(--dim);line-height:1.9;
-  max-width:420px;margin-bottom:clamp(34px,6vw,52px);font-weight:300}
+  max-width:440px;margin-bottom:clamp(34px,6vw,52px);font-weight:300}
+.final-sub .ar{font-family:'Noto Naskh Arabic',serif;color:var(--gold-soft);
+  font-size:1.45em;letter-spacing:0;direction:rtl;display:inline-block;margin-top:4px}
 
 .hold-wrap{display:flex;flex-direction:column;align-items:center;gap:18px}
 .hold-btn{position:relative;width:clamp(120px,26vw,148px);height:clamp(120px,26vw,148px);
-  border-radius:50%;background:transparent;border:none;cursor:pointer;
-  display:grid;place-items:center;
-  -webkit-tap-highlight-color:transparent;touch-action:none;user-select:none}
-.hold-btn svg{grid-area:1/1;width:100%;height:100%;transform:rotate(-90deg)}
+  border-radius:50%;background:transparent;border:none;cursor:pointer;display:grid;place-items:center;
+  -webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;outline:none}
+.hold-btn:focus-visible{box-shadow:0 0 0 2px rgba(212,175,55,.5)}
+.hold-btn svg.ring{grid-area:1/1;width:100%;height:100%;transform:rotate(-90deg)}
 .ring-track{fill:none;stroke:var(--faint);stroke-width:2}
 .ring-prog{fill:none;stroke:url(#goldRing);stroke-width:3;stroke-linecap:round;
-  pathLength:1;stroke-dasharray:1;stroke-dashoffset:1;
-  filter:drop-shadow(0 0 5px rgba(212,175,55,.5))}
+  pathLength:1;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 0 5px rgba(212,175,55,.5))}
 .ring-prog.filling{transition:stroke-dashoffset 2.4s linear}
 .ring-prog.reset{transition:stroke-dashoffset .4s var(--ease)}
 .hold-label{grid-area:1/1;position:relative;z-index:2;
@@ -258,245 +242,281 @@ body{
 .hold-hint{font-size:clamp(9px,1.7vw,11px);letter-spacing:.18em;text-transform:uppercase;
   color:var(--dim);transition:opacity .3s ease}
 
-/* ────────────────────────────────────────────────────────────
-   NAVIGATION UI
-──────────────────────────────────────────────────────────── */
+/* ── NAVIGATION UI ─────────────────────────────────────────── */
 #dots{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));left:50%;
   transform:translateX(-50%);display:flex;gap:11px;z-index:50}
 #dots .dot{width:7px;height:7px;border-radius:50%;background:var(--faint);cursor:pointer;
-  transition:all .4s var(--ease)}
+  border:none;padding:0;transition:all .4s var(--ease)}
 #dots .dot.active{background:var(--gold);box-shadow:0 0 10px rgba(212,175,55,.6);transform:scale(1.25)}
 
 #nav-hint{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));right:clamp(20px,4vw,38px);
   font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);z-index:50;
-  display:flex;align-items:center;gap:9px;opacity:0;animation:hintIn .8s ease 1.8s forwards}
+  display:flex;align-items:center;gap:9px;opacity:0;transition:opacity .5s ease}
+#nav-hint.show{opacity:1}
 #nav-hint .arrow{animation:nudge 1.8s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
-@keyframes hintIn{to{opacity:1}}
-
-#nav-back{position:fixed;top:50%;left:clamp(12px,3vw,26px);transform:translateY(-50%);
-  width:42px;height:42px;border-radius:50%;border:1px solid var(--faint);background:rgba(0,0,0,.4);
-  color:var(--dim);cursor:pointer;z-index:50;display:grid;place-items:center;font-size:16px;
-  opacity:0;pointer-events:none;transition:all .4s var(--ease)}
-#nav-back.show{opacity:1;pointer-events:auto}
-#nav-back:hover{border-color:var(--gold);color:var(--gold)}
 
 @media (prefers-reduced-motion: reduce){
-  .orbit-ring, .glow-aura, .dust {display:none}
+  .glow-aura,.orbit-ring,.dust{display:none}
   #deck{transition-duration:.3s}
+  .tw .c{transition:none}
+  .gold.sweep{animation:none}
+  .branch .stem{stroke-dashoffset:0}
+  .branch .flower{opacity:1;transform:scale(1)}
+  .branch .leaf{opacity:.7}
 }
 </style>
 </head>
 <body>
 
-<div id="deck">
-
-  <!-- ═══ 1 · INTRO ═══ -->
-  <section class="slide active">
-    <div class="inner">
-      <div class="emblem anim-in">
-        <!-- Celestial Orbit aura effects to replace the ripple rings entirely -->
-        <div class="glow-aura"></div>
-        <div class="orbit-ring orbit-outer"></div>
-        <div class="orbit-ring orbit-inner"></div>
-        <div class="dust dust-1"></div>
-        <div class="dust dust-2"></div>
-        <div class="dust dust-3"></div>
-        <div class="dust dust-4"></div>
-        <div class="profile-container">
-          <img src="https://i.imgur.com/JvRTr7p.jpeg" alt="Talib al-Ilm">
-        </div>
-      </div>
-      <h1 class="intro-title anim-in d1">Talib al-&#x02BF;Ilm</h1>
-      <!-- Removed Arabic subtitle as requested -->
-      <div class="intro-sub anim-in d2">An interactive roadmap of the Islamic sciences</div>
-    </div>
-  </section>
-
-  <!-- ═══ 2 · FEATURE 01 ═══ -->
-  <section class="slide">
-    <div class="inner">
-      <div class="index anim-in">Feature 01</div>
-      <h2 class="f-title tw" data-tw="The Knowledge Tree"></h2>
-      <p class="f-text tw" data-tw="A structured roadmap of {{six levels}}, from entry to mastery. Each level branches into its sciences and the texts studied within them."></p>
-    </div>
-  </section>
-
-  <!-- ═══ 3 · FEATURE 02 ═══ -->
-  <section class="slide">
-    <div class="inner">
-      <div class="index anim-in">Feature 02</div>
-      <h2 class="f-title tw" data-tw="Qur'an Memorization"></h2>
-      <p class="f-text tw" data-tw="The {{thirty juz}} are distributed across the levels. Each juz is tracked individually as it is committed to memory."></p>
-    </div>
-  </section>
-
-  <!-- ═══ 4 · FEATURE 03 ═══ -->
-  <section class="slide">
-    <div class="inner">
-      <div class="index anim-in">Feature 03</div>
-      <h2 class="f-title tw" data-tw="Four Schools of Fiqh"></h2>
-      <p class="f-text tw" data-tw="The roadmap supports the {{Hanbali, Shafi'i, Maliki, and Hanafi}} schools. Selecting one filters the fiqh texts to that school."></p>
-    </div>
-  </section>
-
-  <!-- ═══ 5 · FEATURE 04 ═══ -->
-  <section class="slide">
-    <div class="inner">
-      <div class="index anim-in">Feature 04</div>
-      <h2 class="f-title tw" data-tw="Spaced Repetition"></h2>
-      <p class="f-text tw" data-tw="Texts marked for memorization enter a {{review schedule}} at increasing intervals. Due texts are listed for revision."></p>
-    </div>
-  </section>
-
-  <!-- ═══ 6 · FEATURE 05 ═══ -->
-  <section class="slide">
-    <div class="inner">
-      <div class="index anim-in">Feature 05</div>
-      <h2 class="f-title tw" data-tw="Progress Tracking"></h2>
-      <p class="f-text tw" data-tw="Each text can be marked {{started or finished}}. Progress is recorded per text, per level, and overall."></p>
-    </div>
-  </section>
-
-  <!-- ═══ 7 · FINAL ═══ -->
-  <section class="slide">
-    <div class="inner">
-      <!-- Clean, elegant Hamdalah without harakaat matching image_74de0a.png requirements -->
-      <div class="seal anim-in">الحمد لله</div>
-      <h2 class="final-title anim-in d1">Begin</h2>
-      <p class="final-sub anim-in d2">Hold the button to enter the roadmap.</p>
-      <div class="hold-wrap anim-in d3">
-        <button class="hold-btn" id="holdBtn" aria-label="Hold to enter">
-          <svg viewBox="0 0 100 100">
-            <defs>
-              <linearGradient id="goldRing" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#f6e27a"/>
-                <stop offset="60%" stop-color="#D4AF37"/>
-                <stop offset="100%" stop-color="#a9831f"/>
-              </linearGradient>
-            </defs>
-            <circle class="ring-track" cx="50" cy="50" r="46"/>
-            <circle class="ring-prog"  cx="50" cy="50" r="46" pathLength="1"/>
-          </svg>
-          <span class="hold-glow"></span>
-          <span class="hold-label" id="holdLabel">Hold<br>to Enter</span>
-        </button>
-        <div class="hold-hint" id="holdHint">Press and hold</div>
-      </div>
-    </div>
-  </section>
-
-</div>
+<div id="deck" aria-live="polite"></div>
 
 <div id="dots"></div>
 <div id="nav-hint"><span>Swipe</span><span class="arrow">&#8594;</span></div>
-<button id="nav-back" aria-label="Previous">&#8592;</button>
+
+<!-- shared SVG gradient for the hold ring -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="goldRing" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#f6e27a"/><stop offset="60%" stop-color="#D4AF37"/><stop offset="100%" stop-color="#a9831f"/>
+  </linearGradient>
+</defs></svg>
 
 <script>
 "use strict";
 (function(){
-  const deck    = document.getElementById('deck');
-  const slides  = Array.from(document.querySelectorAll('.slide'));
-  const dotsEl  = document.getElementById('dots');
-  const backBtn = document.getElementById('nav-back');
-  const navHint = document.getElementById('nav-hint');
-  const total   = slides.length;
+  /* ── Config (single source of truth) ── */
+  const CONFIG = {
+    HOLD_MS:2400, TYPE_SPEED:24, FIRST_DELAY:140, NEXT_DELAY:60,
+    WHEEL_COOLDOWN:950, APP_URL:''
+  };
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const AR = /[\u0600-\u06FF]/;   // Arabic range
+
+  /* A reusable organic branch (stem + two leaves + 5-petal flower). */
+  const BRANCH = `<svg class="branch __CORNER__" viewBox="0 0 300 300" style="--flower:__COLOR__" aria-hidden="true">
+      <path class="stem" d="M8,292 C46,250 64,214 96,184 C128,154 152,126 182,86"/>
+      <path class="stem" d="M96,184 C104,160 124,150 150,150"/>
+      <path class="stem" d="M150,150 C156,128 150,108 162,92"/>
+      <ellipse class="leaf l1" cx="150" cy="150" rx="13" ry="6" transform="rotate(18 150 150)"/>
+      <ellipse class="leaf l2" cx="162" cy="92" rx="11" ry="5" transform="rotate(-28 162 92)"/>
+      <g transform="translate(182,84)">
+        <g class="flower">
+          <ellipse class="petal" cx="0" cy="-11" rx="6.5" ry="12"/>
+          <ellipse class="petal" cx="10.5" cy="-3.4" rx="6.5" ry="12" transform="rotate(72)"/>
+          <ellipse class="petal" cx="6.5" cy="8.9" rx="6.5" ry="12" transform="rotate(144)"/>
+          <ellipse class="petal" cx="-6.5" cy="8.9" rx="6.5" ry="12" transform="rotate(216)"/>
+          <ellipse class="petal" cx="-10.5" cy="-3.4" rx="6.5" ry="12" transform="rotate(288)"/>
+          <circle class="petal-core" cx="0" cy="0" r="4.5"/>
+        </g>
+      </g>
+    </svg>`;
+  function branch(corner,color){ return BRANCH.replace('__CORNER__',corner).replace('__COLOR__',color); }
+
+  /* ── Slide data (array-driven) ── */
+  const SLIDES = [
+    { type:'intro',  corner:'tl', flower:'#D4AF37' },
+    { type:'feature', corner:'tr', flower:'#64b5f6', index:'Feature 01', title:'The Knowledge Tree',
+      text:'A structured roadmap of {{six levels}}, from entry to mastery. Each level branches into its sciences and the texts studied within them.' },
+    { type:'feature', corner:'bl', flower:'#69f0ae', index:'Feature 02', title:"Qur'an Memorization",
+      text:'The {{thirty juz}} are distributed across the levels. Each juz is tracked individually as it is committed to memory, {{ar:إن شاء الله}}.' },
+    { type:'feature', corner:'br', flower:'#ce93d8', index:'Feature 03', title:'Four Schools of Fiqh',
+      text:"The roadmap supports the {{Hanbali|#81c784}}, {{Shafi'i|#64b5f6}}, {{Maliki|#ce93d8}}, and {{Hanafi|#ff8a65}} schools. Selecting one filters the fiqh texts to that school." },
+    { type:'feature', corner:'tl', flower:'#e06b9c', index:'Feature 04', title:'Spaced Repetition',
+      text:'Texts marked for memorization enter a {{review schedule}} at increasing intervals. Due texts are listed for revision.' },
+    { type:'feature', corner:'tr', flower:'#22b8d6', index:'Feature 05', title:'Progress Tracking',
+      text:'Each text can be marked {{started or finished}}. Progress is recorded per text, per level, and overall.' },
+    { type:'final',  corner:'br', flower:'#D4AF37' }
+  ];
+
+  const deck = document.getElementById('deck');
+  CONFIG.APP_URL = deck.getAttribute('data-app-url') || CONFIG.APP_URL;
+
+  /* ── Build slides ── */
+  function buildSlides(){
+    return SLIDES.map(s=>{
+      const br = (s.type==='intro' || s.type==='final') ? '' : branch(s.corner, s.flower); // no branch on intro/final
+      if(s.type==='intro'){
+        return `<section class="slide" data-type="intro">
+          <div class="inner">
+            <div class="emblem anim-in">
+              <div class="glow-aura"></div>
+              <div class="orbit-ring orbit-outer"></div>
+              <div class="orbit-ring orbit-inner"></div>
+              <div class="dust dust-1"></div><div class="dust dust-2"></div>
+              <div class="dust dust-3"></div><div class="dust dust-4"></div>
+              <div class="profile-container"><img src="https://i.imgur.com/STz3I9W.png" alt="Talib al-Ilm"></div>
+            </div>
+            <h1 class="intro-title anim-in d1" tabindex="-1">Talib al-&#x02BF;Ilm</h1>
+            <div class="intro-sub anim-in d2">An interactive roadmap of the Islamic sciences</div>
+            <div class="intro-insha anim-in d3">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</div>
+          </div>
+        </section>`;
+      }
+      if(s.type==='final'){
+        return `<section class="slide" data-type="final">${br}
+          <div class="inner">
+            <div class="seal anim-in">&#1575;&#1604;&#1581;&#1605;&#1583; &#1604;&#1604;&#1607;</div>
+            <h2 class="final-title anim-in d1" tabindex="-1">Begin</h2>
+            <p class="final-sub anim-in d2">Hold the button to enter the roadmap,<br><span class="ar">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</span></p>
+            <div class="hold-wrap anim-in d3">
+              <button class="hold-btn" id="holdBtn" aria-label="Hold to enter the roadmap">
+                <svg class="ring" viewBox="0 0 100 100">
+                  <circle class="ring-track" cx="50" cy="50" r="46"/>
+                  <circle class="ring-prog" cx="50" cy="50" r="46" pathLength="1"/>
+                </svg>
+                <span class="hold-glow"></span>
+                <span class="hold-label" id="holdLabel">Hold<br>to Enter</span>
+              </button>
+              <div class="hold-hint" id="holdHint">Press and hold</div>
+            </div>
+          </div>
+        </section>`;
+      }
+      // feature — heading uses entrance animation; only the paragraph types
+      return `<section class="slide" data-type="feature">${br}
+        <div class="inner">
+          <h2 class="f-title anim-in" tabindex="-1">${s.title}</h2>
+          <p class="f-text tw" data-tw="${escapeAttr(s.text)}"></p>
+        </div>
+      </section>`;
+    }).join('');
+  }
+  function escapeAttr(str){ return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+  deck.innerHTML = buildSlides();
+  const slides = Array.from(deck.querySelectorAll('.slide'));
+  const total  = slides.length;
   let index = 0;
   const typed = new Set();
 
-  /* progress dots */
+  /* ── Dots ── */
+  const dotsEl = document.getElementById('dots');
   slides.forEach((_,i)=>{
-    const d=document.createElement('div');
+    const d=document.createElement('button');
     d.className='dot'+(i===0?' active':'');
-    d.addEventListener('click',()=>go(i));
+    d.setAttribute('aria-label','Go to slide '+(i+1));
+    d.addEventListener('click',()=>go(i,true));
     dotsEl.appendChild(d);
   });
-  const dots=Array.from(dotsEl.children);
+  const dots = Array.from(dotsEl.children);
 
-  function go(n){
+  const navHint = document.getElementById('nav-hint');
+
+  /* ── Navigation ── */
+  function go(n, userInitiated){
     n=Math.max(0,Math.min(total-1,n));
-    if(n===index) return;
+    if(n===index && userInitiated!=='init') return;
     index=n;
-    deck.style.transform=`translateX(${-100*index}vw)`;
-    update();
+    deck.style.transform=`translateX(${-100*index}vw) translateZ(0)`;
+    update(userInitiated);
   }
-  const next=()=>go(index+1);
-  const prev=()=>go(index-1);
+  const next=()=>go(index+1,true);
+  const prev=()=>go(index-1,true);
 
-  function update(){
-    slides.forEach((s,i)=>s.classList.toggle('active',i===index));
+  function update(userInitiated){
+    slides.forEach((s,i)=>{
+      const on=(i===index);
+      s.classList.toggle('active',on);
+      s.setAttribute('aria-hidden',on?'false':'true');
+      if('inert' in HTMLElement.prototype){ s.inert=!on; }
+    });
     dots.forEach((d,i)=>d.classList.toggle('active',i===index));
-    backBtn.classList.toggle('show',index>0);
-    navHint.style.opacity=(index<total-1)?'':'0';
+    navHint.classList.toggle('show',index===0);
     if(!typed.has(index)) typeSlide(slides[index]);
+    if(userInitiated===true){
+      const h=slides[index].querySelector('[tabindex="-1"]');
+      if(h) h.focus({preventScroll:true});
+    }
   }
 
-  /* ── Robust Typewriter ──
-     Characters are rendered incrementally. The active letter gets
-     an absolute shadow-based styling which keeps the cursor inline and
-     eliminates jumpy wraps or isolated center lines. */
+  /* ── Typewriter (paragraphs) ── */
   function typeSlide(slide){
     typed.add(slides.indexOf(slide));
     const targets=slide.querySelectorAll('[data-tw]');
     if(!targets.length) return;
     let chain=Promise.resolve();
-    targets.forEach((el,i)=>{ chain=chain.then(()=>typeInto(el, i===0?180:60)); });
+    targets.forEach((el,i)=>{ chain=chain.then(()=>typeInto(el, i===0?CONFIG.FIRST_DELAY:CONFIG.NEXT_DELAY)); });
   }
 
-  function typeInto(el,startDelay){
+  function typeInto(el, startDelay){
     return new Promise(resolve=>{
-      const tokens=parseGold(el.getAttribute('data-tw'));
+      const tokens=parseTokens(el.getAttribute('data-tw'));
       el.innerHTML='';
-      const charSpans=[];
+      const letters=[];     // revealable units
+      const styledEls=[];   // gold els to sweep
+      let word=null;
+      const flush=()=>{ if(word){ el.appendChild(word); word=null; } };
+
       tokens.forEach(t=>{
+        // Arabic (or explicit ar:) → ONE unit so letters stay joined
+        if(t.arabic || AR.test(t.text)){
+          flush();
+          const s=document.createElement('span');
+          s.className='c ar';
+          const col = t.color || (t.gold ? 'var(--gold)' : '');
+          if(col){ s.style.color=col; s.style.webkitTextFillColor=col; }
+          s.textContent=t.text;
+          const w=document.createElement('span'); w.className='word'; w.appendChild(s);
+          el.appendChild(w);
+          letters.push(s);
+          return;
+        }
         for(const ch of t.text){
+          if(ch===' '){ flush(); el.appendChild(document.createTextNode(' ')); continue; }
+          if(!word){ word=document.createElement('span'); word.className='word'; }
           const s=document.createElement('span');
           s.className='c'+(t.gold?' gold':'');
-          s.textContent = ch;
-          el.appendChild(s);
-          charSpans.push(s);
+          if(t.color){ s.style.color=t.color; s.style.webkitTextFillColor=t.color; }
+          s.textContent=ch;
+          word.appendChild(s);
+          letters.push(s);
+          if(t.gold) styledEls.push(s);
         }
       });
+      flush();
 
-      let i=0;
-      const SPEED=24;
+      const finish=()=>{ if(!REDUCED) styledEls.forEach(g=>g.classList.add('sweep')); resolve(); };
+      if(REDUCED){ letters.forEach(s=>s.classList.add('on')); finish(); return; }
+
+      let i=0, prevCursor=null;
       function step(){
-        if(i>0) {
-          charSpans[i-1].classList.remove('typing-active');
-        }
-        if(i>=charSpans.length){ 
-          resolve(); 
-          return; 
-        }
-        const s=charSpans[i++];
-        s.classList.add('on', 'typing-active');
-        setTimeout(step,SPEED);
+        if(prevCursor){ prevCursor.classList.remove('cursor'); prevCursor=null; }
+        if(i>=letters.length){ finish(); return; }
+        const s=letters[i++];
+        s.classList.add('on');
+        if(!s.classList.contains('ar')){ s.classList.add('cursor'); prevCursor=s; }
+        setTimeout(step, CONFIG.TYPE_SPEED);
       }
-      setTimeout(step,startDelay);
+      setTimeout(step, startDelay);
     });
   }
 
-  function parseGold(str){
+  /* Tokens: {{gold}} · {{text|#color}} · {{ar:عربى}} (forced Arabic unit) */
+  function parseTokens(str){
     const out=[],re=/\{\{(.+?)\}\}/g;let last=0,m;
     while((m=re.exec(str))){
-      if(m.index>last) out.push({text:str.slice(last,m.index),gold:false});
-      out.push({text:m[1],gold:true});
+      if(m.index>last) out.push({text:str.slice(last,m.index),gold:false,color:null,arabic:false});
+      let inner=m[1], color=null, gold=true, arabic=false;
+      if(inner.indexOf('ar:')===0){ arabic=true; gold=true; inner=inner.slice(3); }
+      const pipe=inner.lastIndexOf('|');
+      if(pipe>-1){ color=inner.slice(pipe+1); inner=inner.slice(0,pipe); gold=false; }
+      out.push({text:inner,gold:gold,color:color,arabic:arabic});
       last=m.index+m[0].length;
     }
-    if(last<str.length) out.push({text:str.slice(last),gold:false});
+    if(last<str.length) out.push({text:str.slice(last),gold:false,color:null,arabic:false});
     return out;
   }
 
-  /* wheel / trackpad — debounced, one gesture per slide */
+  /* ── Wheel / trackpad ── */
   let wheelLock=false;
   window.addEventListener('wheel',(e)=>{
     const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
     if(Math.abs(delta)<12||wheelLock) return;
-    wheelLock=true; setTimeout(()=>wheelLock=false,950);
+    wheelLock=true; setTimeout(()=>wheelLock=false,CONFIG.WHEEL_COOLDOWN);
     delta>0?next():prev();
   },{passive:true});
 
-  /* touch swipe */
+  /* ── Touch swipe ── */
   let tx=null,ty=null;
   window.addEventListener('touchstart',(e)=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
   window.addEventListener('touchend',(e)=>{
@@ -506,36 +526,36 @@ body{
     tx=ty=null;
   },{passive:true});
 
-  /* keyboard */
+  /* ── Keyboard ── */
   window.addEventListener('keydown',(e)=>{
+    if(e.target && e.target.id==='holdBtn') return;
     if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();next();}
     else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
-    else if(e.key==='Home') go(0);
-    else if(e.key==='End') go(total-1);
+    else if(e.key==='Home') go(0,true);
+    else if(e.key==='End') go(total-1,true);
   });
 
-  backBtn.addEventListener('click',prev);
-  window.addEventListener('resize',()=>{ deck.style.transform=`translateX(${-100*index}vw)`; });
-  update();
+  window.addEventListener('resize',()=>{ deck.style.transform=`translateX(${-100*index}vw) translateZ(0)`; });
 
-  /* ── Hold-to-Action ── */
-  const HOLD_MS=2400;
+  go(0,'init');
+
+  /* ════════ HOLD-TO-ACTION ════════ */
   const btn=document.getElementById('holdBtn');
   const ring=btn.querySelector('.ring-prog');
   const label=document.getElementById('holdLabel');
   const hint=document.getElementById('holdHint');
-  let holdTimer=null, completed=false;
+  let holdTimer=null, completed=false, keyHeld=false;
 
   function startHold(e){
     if(completed) return;
-    if(e.cancelable) e.preventDefault();
+    if(e&&e.cancelable) e.preventDefault();
     btn.classList.add('holding');
     ring.classList.remove('reset'); ring.classList.add('filling');
     void ring.getBoundingClientRect();
     ring.style.strokeDashoffset='0';
     hint.style.opacity='0';
     clearTimeout(holdTimer);
-    holdTimer=setTimeout(completeHold,HOLD_MS);
+    holdTimer=setTimeout(completeHold,CONFIG.HOLD_MS);
   }
   function cancelHold(){
     if(completed) return;
@@ -553,7 +573,9 @@ body{
     hint.textContent='';
     triggerEnter();
   }
+  /* ── REDIRECT HOOK: set data-app-url on #deck when the roadmap is ready ── */
   function triggerEnter(){
+    if(CONFIG.APP_URL){ window.location.href=CONFIG.APP_URL; return; }
     label.innerHTML='Ready';
     setTimeout(()=>{
       completed=false;
@@ -571,6 +593,13 @@ body{
   btn.addEventListener('pointercancel',cancelHold);
   window.addEventListener('pointerup',()=>{ if(!completed) cancelHold(); });
   btn.addEventListener('contextmenu',e=>e.preventDefault());
+  btn.addEventListener('keydown',(e)=>{
+    if((e.key===' '||e.key==='Enter')&&!e.repeat&&!keyHeld){ keyHeld=true; e.preventDefault(); startHold(e); }
+  });
+  btn.addEventListener('keyup',(e)=>{
+    if(e.key===' '||e.key==='Enter'){ keyHeld=false; e.preventDefault(); cancelHold(); }
+  });
+  btn.addEventListener('blur',()=>{ if(keyHeld){ keyHeld=false; cancelHold(); } });
 })();
 </script>
 </body>
