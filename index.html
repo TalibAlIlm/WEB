@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════════
-   TALIB AL-ʿILM — OLED PRESENTATION
+   TALIB AL-ʿILM — OLED HUB / PRESENTATION
    Horizontal slide deck · no traditional scrolling.
    Navigation: wheel / trackpad swipe / touch swipe / keys / dots.
 ════════════════════════════════════════════════════════════ */
@@ -25,7 +25,6 @@
   --dim:#6a6a72;
   --faint:#262629;
   --ease:cubic-bezier(.22,1,.36,1);
-  /* roadmap madhab palette (used for Feature 03 + flowers) */
   --hanbali:#81c784;
   --shafi:#64b5f6;
   --maliki:#ce93d8;
@@ -34,10 +33,10 @@
 
 html,body{height:100%}
 body{
-  background:#000;                 /* OLED black */
+  background:#000;
   color:var(--ink);
   font-family:'IBM Plex Mono',monospace;
-  overflow:hidden;                 /* gesture-driven, no scroll */
+  overflow:hidden;
   -webkit-font-smoothing:antialiased;
 }
 
@@ -71,16 +70,12 @@ body{
 .slide.active .anim-in.d4{transition-delay:.46s}
 
 /* ════════════════════════════════════════════════════════════
-   ORGANIC TREE BRANCH — grows from a slide corner, ends in a
-   flower. Colour + corner differ per slide (set inline / by class).
-   Draws on when the slide becomes active.
+   ORGANIC TREE BRANCH — grows from a slide corner, ends in a flower.
 ════════════════════════════════════════════════════════════ */
 .branch{
   position:absolute;width:clamp(150px,32vw,300px);height:clamp(150px,32vw,300px);
   z-index:1;pointer-events:none;overflow:visible;
 }
-/* base shape grows from bottom-left → flip per corner so it always
-   reaches inward from the page corner it is anchored to */
 .branch.tl{top:0;left:0;transform:scaleY(-1)}
 .branch.tr{top:0;right:0;transform:scale(-1,-1)}
 .branch.bl{bottom:0;left:0}
@@ -105,7 +100,7 @@ body{
 @keyframes leafIn{to{opacity:.7}}
 @keyframes bloom{to{opacity:1;transform:scale(1)}}
 
-/* ── INTRO — centered profile with restored ripple circles ──── */
+/* ── INTRO ─────────────────────────────────────────────────── */
 .emblem{
   position:relative;width:clamp(140px,28vw,200px);height:clamp(140px,28vw,200px);
   margin:0 auto clamp(28px,4.5vw,44px) auto;display:flex;align-items:center;justify-content:center;
@@ -114,13 +109,9 @@ body{
   width:100%;height:100%;border-radius:50%;overflow:hidden;position:relative;z-index:2;
 }
 .profile-container img{
-  width:100%;height:100%;object-fit:cover;
-  object-position:center 50%;
+  width:100%;height:100%;object-fit:cover;object-position:center 50%;
   transform:scale(1.18);transform-origin:center center;
 }
-/* 3D sphere shading: soft light on the upper-left, a curved shadow
-   crescent sweeping down the right edge → adds depth and balances
-   the composition without re-cropping the art. */
 .profile-container::after{
   content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:3;
   background:
@@ -130,10 +121,8 @@ body{
     inset -16px -14px 38px rgba(0,0,0,.55),
     inset 14px 12px 34px rgba(212,175,55,.05);
 }
-/* Ambient Golden breathing glow */
 .glow-aura{
   position:absolute;width:124%;height:124%;border-radius:50%;
-  /* soft multi-stop gradient = the blur look, baked in (no filter to rasterize) */
   background:radial-gradient(circle,
     rgba(212,175,55,0.20) 0%,
     rgba(212,175,55,0.10) 34%,
@@ -142,15 +131,11 @@ body{
   animation:breathe 6s ease-in-out infinite alternate;
   z-index:1;pointer-events:none;
 }
-/* Celestial astrolabe thin orbital rings */
-.orbit-ring{position:absolute;border-radius:50%;z-index:1;pointer-events:none;
-  will-change:transform}
+.orbit-ring{position:absolute;border-radius:50%;z-index:1;pointer-events:none;will-change:transform}
 .orbit-outer{width:138%;height:138%;border:0.75px dashed rgba(212,175,55,0.16);
   animation:rotateClockwise 35s linear infinite}
 .orbit-inner{width:118%;height:118%;border:1px dotted rgba(212,175,55,0.08);
   animation:rotateCounterClockwise 28s linear infinite}
-/* Floating scholastic light embers (particles) — box-shadow glow is far
-   cheaper than an animated drop-shadow filter */
 .dust{position:absolute;width:3px;height:3px;background:var(--gold);border-radius:50%;
   opacity:0;z-index:1;pointer-events:none;will-change:transform,opacity;
   box-shadow:0 0 4px 1px rgba(212,175,55,.7)}
@@ -162,36 +147,42 @@ body{
 @keyframes rotateClockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes rotateCounterClockwise{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
 @keyframes floatDust{0%{transform:translateY(0) scale(0.5);opacity:0}30%{opacity:0.7}70%{opacity:0.3}100%{transform:translateY(-70px) scale(1.2);opacity:0}}
-/* pause intro motion AND release compositor layers while off-screen */
 .slide:not(.active) .glow-aura,
 .slide:not(.active) .orbit-ring,
 .slide:not(.active) .dust{animation-play-state:paused;will-change:auto}
-
 
 .intro-title{font-family:'Cinzel',serif;font-weight:500;
   font-size:clamp(28px,6vw,50px);letter-spacing:.1em;line-height:1.1;margin-bottom:14px}
 .intro-sub{font-size:clamp(10px,2vw,12px);letter-spacing:.26em;text-transform:uppercase;
   color:var(--dim);line-height:1.6}
-/* bigger إن شاء الله, placed under the roadmap subtitle */
 .intro-insha{font-family:'Noto Naskh Arabic',serif;
   font-size:clamp(26px,6vw,46px);line-height:1.4;color:var(--gold);
   margin-top:clamp(20px,4vw,30px);text-shadow:0 0 30px rgba(212,175,55,.3);direction:rtl}
 
 /* ── FEATURE SLIDES ────────────────────────────────────────── */
-/* heading: entrance animation (not typed) */
+.f-tag{display:inline-block;font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+  border:1px solid;border-radius:30px;padding:4px 12px;margin-bottom:18px;font-weight:500}
 .f-title{font-family:'Cinzel',serif;font-weight:500;
   font-size:clamp(24px,5vw,42px);letter-spacing:.03em;line-height:1.25;
   margin-bottom:clamp(18px,3.5vw,28px)}
 .f-text{font-size:clamp(13px,2.4vw,16.5px);line-height:1.85;font-weight:300;
   color:var(--ink);max-width:540px}
-/* focusable headings receive programmatic focus for a11y — no visible box */
 .intro-title,.final-title,.f-title{outline:none}
 .intro-title:focus,.final-title:focus,.f-title:focus,
 .intro-title:focus-visible,.final-title:focus-visible,.f-title:focus-visible{outline:none}
 
-/* Typewriter (paragraphs only): words wrap as units; characters are
-   pre-laid (stable height → no reflow/clipping) and revealed by opacity.
-   Arabic is kept as ONE unit so its letters stay joined. */
+/* companion / resource link buttons */
+.f-links{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:clamp(24px,4.5vw,34px)}
+.f-link{display:inline-flex;align-items:center;gap:9px;text-decoration:none;
+  font-size:clamp(11px,2.1vw,13px);letter-spacing:.08em;color:var(--ink);
+  border:1px solid var(--faint);border-radius:40px;padding:11px 20px;
+  transition:border-color .22s ease,color .22s ease,transform .22s ease,box-shadow .22s ease}
+.f-link:hover{border-color:var(--gold);color:var(--gold-soft);transform:translateY(-2px);
+  box-shadow:0 8px 24px -10px rgba(212,175,55,.5)}
+.f-link .fl-ic{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* Typewriter */
 .tw .word{white-space:nowrap;display:inline}
 .tw .c{opacity:0;transition:opacity .05s linear}
 .tw .c.on{opacity:1}
@@ -201,7 +192,6 @@ body{
   background:var(--gold);border-radius:1px;animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
 
-/* GOLD inside the glyphs (static → no per-frame repaint) */
 .gold{background:linear-gradient(135deg,#f6e27a 0%,#D4AF37 48%,#a9831f 100%);
   background-size:100% 100%;background-position:0 0;
   -webkit-background-clip:text;background-clip:text;
@@ -209,7 +199,7 @@ body{
 .gold.sweep{background-size:220% 100%;animation:goldSweep 1.15s ease forwards}
 @keyframes goldSweep{0%{background-position:210% 0}100%{background-position:0 0}}
 
-/* ── FINAL — Hold-to-Action ────────────────────────────────── */
+/* ── FINAL — Press to Enter ────────────────────────────────── */
 .seal{font-family:'Noto Naskh Arabic',serif;font-size:clamp(32px,6vw,44px);
   color:var(--gold);margin-bottom:22px;letter-spacing:.02em;direction:rtl}
 .final-title{font-family:'Cinzel',serif;font-weight:500;
@@ -219,28 +209,20 @@ body{
 .final-sub .ar{font-family:'Noto Naskh Arabic',serif;color:var(--gold-soft);
   font-size:1.45em;letter-spacing:0;direction:rtl;display:inline-block;margin-top:4px}
 
-.hold-wrap{display:flex;flex-direction:column;align-items:center;gap:18px}
-.hold-btn{position:relative;width:clamp(120px,26vw,148px);height:clamp(120px,26vw,148px);
-  border-radius:50%;background:transparent;border:none;cursor:pointer;display:grid;place-items:center;
-  -webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;outline:none}
-.hold-btn:focus-visible{box-shadow:0 0 0 2px rgba(212,175,55,.5)}
-.hold-btn svg.ring{grid-area:1/1;width:100%;height:100%;transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:var(--faint);stroke-width:2}
-.ring-prog{fill:none;stroke:url(#goldRing);stroke-width:3;stroke-linecap:round;
-  pathLength:1;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 0 5px rgba(212,175,55,.5))}
-.ring-prog.filling{transition:stroke-dashoffset 2.4s linear}
-.ring-prog.reset{transition:stroke-dashoffset .4s var(--ease)}
-.hold-label{grid-area:1/1;position:relative;z-index:2;
-  font-family:'Cinzel',serif;font-size:clamp(11px,2.2vw,13px);letter-spacing:.14em;
-  text-transform:uppercase;color:var(--gold);text-align:center;line-height:1.45;
-  pointer-events:none;transition:transform .2s ease}
-.hold-btn:active .hold-label{transform:scale(.93)}
-.hold-glow{grid-area:1/1;width:100%;height:100%;border-radius:50%;pointer-events:none;
-  box-shadow:0 0 0 0 rgba(212,175,55,0);transition:box-shadow .3s ease}
-.hold-btn.holding .hold-glow{box-shadow:0 0 40px 4px rgba(212,175,55,.3)}
-.hold-btn.complete .hold-glow{box-shadow:0 0 72px 12px rgba(212,175,55,.6)}
-.hold-hint{font-size:clamp(9px,1.7vw,11px);letter-spacing:.18em;text-transform:uppercase;
-  color:var(--dim);transition:opacity .3s ease}
+.enter-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
+.enter-btn{position:relative;font-family:'Cinzel',serif;
+  font-size:clamp(13px,2.6vw,16px);letter-spacing:.16em;text-transform:uppercase;
+  color:#0a0a0a;cursor:pointer;border:none;
+  padding:clamp(15px,3vw,18px) clamp(34px,7vw,52px);border-radius:50px;
+  background:linear-gradient(135deg,#f6e27a 0%,#D4AF37 50%,#a9831f 100%);
+  box-shadow:0 0 0 1px rgba(212,175,55,.4),0 8px 30px -6px rgba(212,175,55,.5);
+  transition:transform .2s var(--ease),box-shadow .3s ease;
+  -webkit-tap-highlight-color:transparent}
+.enter-btn:hover{transform:translateY(-2px);
+  box-shadow:0 0 0 1px rgba(212,175,55,.65),0 16px 44px -6px rgba(212,175,55,.7)}
+.enter-btn:active{transform:translateY(0) scale(.97)}
+.enter-btn:focus-visible{outline:none;box-shadow:0 0 0 2px #000,0 0 0 4px rgba(212,175,55,.7)}
+.enter-hint{font-size:clamp(9px,1.7vw,11px);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
 
 /* ── NAVIGATION UI ─────────────────────────────────────────── */
 #dots{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));left:50%;
@@ -269,30 +251,23 @@ body{
 </head>
 <body>
 
-<div id="deck" aria-live="polite"></div>
+<!-- Set data-app-url to your live roadmap (tree) URL so "Enter" navigates there -->
+<div id="deck" aria-live="polite" data-app-url=""></div>
 
 <div id="dots"></div>
 <div id="nav-hint"><span>Swipe</span><span class="arrow">&#8594;</span></div>
 
-<!-- shared SVG gradient for the hold ring -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <linearGradient id="goldRing" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0%" stop-color="#f6e27a"/><stop offset="60%" stop-color="#D4AF37"/><stop offset="100%" stop-color="#a9831f"/>
-  </linearGradient>
-</defs></svg>
-
 <script>
 "use strict";
 (function(){
-  /* ── Config (single source of truth) ── */
+  /* ── Config ── */
   const CONFIG = {
-    HOLD_MS:2400, TYPE_SPEED:24, FIRST_DELAY:140, NEXT_DELAY:60,
-    WHEEL_COOLDOWN:950, APP_URL:''
+    TYPE_SPEED:24, FIRST_DELAY:140, NEXT_DELAY:60, WHEEL_COOLDOWN:950, APP_URL:''
   };
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const AR = /[\u0600-\u06FF]/;   // Arabic range
+  const AR = /[\u0600-\u06FF]/;
 
-  /* A reusable organic branch (stem + two leaves + 5-petal flower). */
+  /* Reusable organic branch */
   const BRANCH = `<svg class="branch __CORNER__" viewBox="0 0 300 300" style="--flower:__COLOR__" aria-hidden="true">
       <path class="stem" d="M8,292 C46,250 64,214 96,184 C128,154 152,126 182,86"/>
       <path class="stem" d="M96,184 C104,160 124,150 150,150"/>
@@ -312,19 +287,44 @@ body{
     </svg>`;
   function branch(corner,color){ return BRANCH.replace('__CORNER__',corner).replace('__COLOR__',color); }
 
-  /* ── Slide data (array-driven) ── */
+  const NOTE_ICON='<svg class="fl-ic" viewBox="0 0 24 24"><path d="M14 4l6 6M4 20l1-5L16 4l4 4L9 19l-5 1z"/></svg>';
+  const CAL_ICON ='<svg class="fl-ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>';
+
+  /* ── Slide data ── */
   const SLIDES = [
     { type:'intro',  corner:'tl', flower:'#D4AF37' },
-    { type:'feature', corner:'tr', flower:'#64b5f6', index:'Feature 01', title:'The Knowledge Tree',
-      text:'A structured roadmap of {{six levels}}, from entry to mastery. Each level branches into its sciences and the texts studied within them.' },
-    { type:'feature', corner:'bl', flower:'#69f0ae', index:'Feature 02', title:"Qur'an Memorization",
-      text:'The {{thirty juz}} are distributed across the levels. Each juz is tracked individually as it is committed to memory, {{ar:إن شاء الله}}.' },
-    { type:'feature', corner:'br', flower:'#ce93d8', index:'Feature 03', title:'Four Schools of Fiqh',
-      text:"The roadmap supports the {{Hanbali|#81c784}}, {{Shafi'i|#64b5f6}}, {{Maliki|#ce93d8}}, and {{Hanafi|#ff8a65}} schools. Selecting one filters the fiqh texts to that school." },
-    { type:'feature', corner:'tl', flower:'#e06b9c', index:'Feature 04', title:'Spaced Repetition',
-      text:'Texts marked for memorization enter a {{review schedule}} at increasing intervals. Due texts are listed for revision.' },
-    { type:'feature', corner:'tr', flower:'#22b8d6', index:'Feature 05', title:'Progress Tracking',
-      text:'Each text can be marked {{started or finished}}. Progress is recorded per text, per level, and overall.' },
+
+    { type:'feature', corner:'tr', flower:'#64b5f6', title:'The Knowledge Tree',
+      text:'A structured roadmap of {{six levels}}, from your first steps to mastery. Each level branches into its sciences and the texts studied within them.' },
+
+    { type:'feature', corner:'bl', flower:'#69f0ae', title:"Qur'an Memorization",
+      text:'The {{thirty juz}} are distributed across the levels and tracked individually as each is committed to memory, {{ar:إن شاء الله}}.' },
+
+    { type:'feature', corner:'br', flower:'#ce93d8', title:'Four Schools of Fiqh',
+      text:"The roadmap supports the {{Hanbali|#81c784}}, {{Shafi'i|#64b5f6}}, {{Maliki|#ce93d8}}, and {{Hanafi|#ff8a65}} schools — choosing one filters the fiqh texts to it, while every shared science stays visible." },
+
+    { type:'feature', corner:'tl', flower:'#f0b357', title:'Specializations',
+      text:'Choose one or more {{takhaṣṣuṣ}} tracks — ʿaqīdah, ḥadīth, fiqh, tafsīr, sīrah, or Arabic. Each adds its advanced texts to your {{memorization plan}}; the core remains for everyone.' },
+
+    { type:'feature', corner:'tr', flower:'#e06b9c', title:'Spaced Repetition',
+      text:'Texts marked for memorization enter a {{review schedule}} at widening intervals — and when they fall due, a quiet badge calls you back to revise.' },
+
+    { type:'feature', corner:'bl', flower:'#7fd1ae', title:'Ḥifẓ Mode',
+      text:'A dedicated {{ḥifẓ view}} gathers every text you are memorizing — showing what is secured and what is {{due for review today}}, all in one focused screen.' },
+
+    { type:'feature', corner:'br', flower:'#c9a0e0', tag:'Coming soon', title:'Shurūḥ of the Works',
+      text:'Press and hold any text to bloom its {{shurūḥ}} — the classical commentaries that unlock it — each linked to its source, {{ar:إن شاء الله}}.' },
+
+    { type:'feature', corner:'tl', flower:'#22b8d6', title:'Progress Tracking',
+      text:'Mark each text {{started or finished}}. Your progress is recorded per text, per level, and across the whole journey.' },
+
+    { type:'feature', corner:'tr', flower:'#6fb0d6', title:'Resources & Companions',
+      text:'Every text links to its {{book, PDF, and recorded explanation}}. Two companion apps complete the suite:',
+      links:[
+        { label:'Notes',   url:'https://talibalilm.github.io/NOTES/',   icon:NOTE_ICON },
+        { label:'Planner', url:'https://talibalilm.github.io/PLANNER/', icon:CAL_ICON }
+      ] },
+
     { type:'final',  corner:'br', flower:'#D4AF37' }
   ];
 
@@ -334,7 +334,7 @@ body{
   /* ── Build slides ── */
   function buildSlides(){
     return SLIDES.map(s=>{
-      const br = (s.type==='intro' || s.type==='final') ? '' : branch(s.corner, s.flower); // no branch on intro/final
+      const br = (s.type==='intro' || s.type==='final') ? '' : branch(s.corner, s.flower);
       if(s.type==='intro'){
         return `<section class="slide" data-type="intro">
           <div class="inner">
@@ -357,26 +357,25 @@ body{
           <div class="inner">
             <div class="seal anim-in">&#1575;&#1604;&#1581;&#1605;&#1583; &#1604;&#1604;&#1607;</div>
             <h2 class="final-title anim-in d1" tabindex="-1">Begin</h2>
-            <p class="final-sub anim-in d2">Hold the button to enter the roadmap,<br><span class="ar">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</span></p>
-            <div class="hold-wrap anim-in d3">
-              <button class="hold-btn" id="holdBtn" aria-label="Hold to enter the roadmap">
-                <svg class="ring" viewBox="0 0 100 100">
-                  <circle class="ring-track" cx="50" cy="50" r="46"/>
-                  <circle class="ring-prog" cx="50" cy="50" r="46" pathLength="1"/>
-                </svg>
-                <span class="hold-glow"></span>
-                <span class="hold-label" id="holdLabel">Hold<br>to Enter</span>
-              </button>
-              <div class="hold-hint" id="holdHint">Press and hold</div>
+            <p class="final-sub anim-in d2">Enter the roadmap and begin your path,<br><span class="ar">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</span></p>
+            <div class="enter-wrap anim-in d3">
+              <button class="enter-btn" id="enterBtn">Enter the Roadmap</button>
             </div>
           </div>
         </section>`;
       }
-      // feature — heading uses entrance animation; only the paragraph types
+      // feature
+      const tag = s.tag ? `<span class="f-tag anim-in" style="color:${s.flower};border-color:${s.flower}66">${s.tag}</span>` : '';
+      const titleCls = 'f-title anim-in' + (s.tag ? ' d1' : '');
+      const links = s.links ? `<div class="f-links anim-in d3">${
+        s.links.map(l=>`<a class="f-link" href="${l.url}" target="_blank" rel="noopener">${l.icon||''}<span>${l.label}</span></a>`).join('')
+      }</div>` : '';
       return `<section class="slide" data-type="feature">${br}
         <div class="inner">
-          <h2 class="f-title anim-in" tabindex="-1">${s.title}</h2>
+          ${tag}
+          <h2 class="${titleCls}" tabindex="-1">${s.title}</h2>
           <p class="f-text tw" data-tw="${escapeAttr(s.text)}"></p>
+          ${links}
         </div>
       </section>`;
     }).join('');
@@ -399,7 +398,6 @@ body{
     dotsEl.appendChild(d);
   });
   const dots = Array.from(dotsEl.children);
-
   const navHint = document.getElementById('nav-hint');
 
   /* ── Navigation ── */
@@ -429,7 +427,7 @@ body{
     }
   }
 
-  /* ── Typewriter (paragraphs) ── */
+  /* ── Typewriter ── */
   function typeSlide(slide){
     typed.add(slides.indexOf(slide));
     const targets=slide.querySelectorAll('[data-tw]');
@@ -442,13 +440,12 @@ body{
     return new Promise(resolve=>{
       const tokens=parseTokens(el.getAttribute('data-tw'));
       el.innerHTML='';
-      const letters=[];     // revealable units
-      const styledEls=[];   // gold els to sweep
+      const letters=[];
+      const styledEls=[];
       let word=null;
       const flush=()=>{ if(word){ el.appendChild(word); word=null; } };
 
       tokens.forEach(t=>{
-        // Arabic (or explicit ar:) → ONE unit so letters stay joined
         if(t.arabic || AR.test(t.text)){
           flush();
           const s=document.createElement('span');
@@ -491,7 +488,6 @@ body{
     });
   }
 
-  /* Tokens: {{gold}} · {{text|#color}} · {{ar:عربى}} (forced Arabic unit) */
   function parseTokens(str){
     const out=[],re=/\{\{(.+?)\}\}/g;let last=0,m;
     while((m=re.exec(str))){
@@ -528,7 +524,6 @@ body{
 
   /* ── Keyboard ── */
   window.addEventListener('keydown',(e)=>{
-    if(e.target && e.target.id==='holdBtn') return;
     if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();next();}
     else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
     else if(e.key==='Home') go(0,true);
@@ -539,67 +534,17 @@ body{
 
   go(0,'init');
 
-  /* ════════ HOLD-TO-ACTION ════════ */
-  const btn=document.getElementById('holdBtn');
-  const ring=btn.querySelector('.ring-prog');
-  const label=document.getElementById('holdLabel');
-  const hint=document.getElementById('holdHint');
-  let holdTimer=null, completed=false, keyHeld=false;
-
-  function startHold(e){
-    if(completed) return;
-    if(e&&e.cancelable) e.preventDefault();
-    btn.classList.add('holding');
-    ring.classList.remove('reset'); ring.classList.add('filling');
-    void ring.getBoundingClientRect();
-    ring.style.strokeDashoffset='0';
-    hint.style.opacity='0';
-    clearTimeout(holdTimer);
-    holdTimer=setTimeout(completeHold,CONFIG.HOLD_MS);
+  /* ── Press-to-enter ── */
+  const enterBtn=document.getElementById('enterBtn');
+  if(enterBtn){
+    enterBtn.addEventListener('click',()=>{
+      if(CONFIG.APP_URL){ window.location.href=CONFIG.APP_URL; return; }
+      // No URL configured yet — gentle acknowledgement
+      if(enterBtn.animate){
+        enterBtn.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:260,easing:'ease'});
+      }
+    });
   }
-  function cancelHold(){
-    if(completed) return;
-    clearTimeout(holdTimer);
-    btn.classList.remove('holding');
-    ring.classList.remove('filling'); ring.classList.add('reset');
-    ring.style.strokeDashoffset='1';
-    hint.style.opacity='';
-  }
-  function completeHold(){
-    completed=true;
-    btn.classList.remove('holding'); btn.classList.add('complete');
-    ring.style.strokeDashoffset='0';
-    label.innerHTML='Entering';
-    hint.textContent='';
-    triggerEnter();
-  }
-  /* ── REDIRECT HOOK: set data-app-url on #deck when the roadmap is ready ── */
-  function triggerEnter(){
-    if(CONFIG.APP_URL){ window.location.href=CONFIG.APP_URL; return; }
-    label.innerHTML='Ready';
-    setTimeout(()=>{
-      completed=false;
-      btn.classList.remove('complete');
-      ring.classList.add('reset');
-      ring.style.strokeDashoffset='1';
-      label.innerHTML='Hold<br>to Enter';
-      hint.textContent='Press and hold'; hint.style.opacity='';
-    },1600);
-  }
-
-  btn.addEventListener('pointerdown',startHold);
-  btn.addEventListener('pointerup',cancelHold);
-  btn.addEventListener('pointerleave',cancelHold);
-  btn.addEventListener('pointercancel',cancelHold);
-  window.addEventListener('pointerup',()=>{ if(!completed) cancelHold(); });
-  btn.addEventListener('contextmenu',e=>e.preventDefault());
-  btn.addEventListener('keydown',(e)=>{
-    if((e.key===' '||e.key==='Enter')&&!e.repeat&&!keyHeld){ keyHeld=true; e.preventDefault(); startHold(e); }
-  });
-  btn.addEventListener('keyup',(e)=>{
-    if(e.key===' '||e.key==='Enter'){ keyHeld=false; e.preventDefault(); cancelHold(); }
-  });
-  btn.addEventListener('blur',()=>{ if(keyHeld){ keyHeld=false; cancelHold(); } });
 })();
 </script>
 </body>
