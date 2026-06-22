@@ -229,6 +229,8 @@ body::before{
   max-width:440px;margin-bottom:clamp(34px,6vw,52px);font-weight:300}
 .final-sub .ar{font-family:'Noto Naskh Arabic',serif;color:var(--gold-soft);
   font-size:1.45em;letter-spacing:0;direction:rtl;display:inline-block;margin-top:4px}
+.final-flower{font-size:clamp(46px,10vw,76px);line-height:1;color:var(--gold);
+  margin-bottom:clamp(34px,6vw,52px);text-shadow:0 0 26px rgba(212,175,55,.5)}
 
 .enter-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
 .enter-btn{display:flex;align-items:center;background:transparent;border:0;outline:0;
@@ -377,9 +379,9 @@ body::before{
           <div class="inner">
             <div class="seal anim-in">&#1575;&#1604;&#1581;&#1605;&#1583; &#1604;&#1604;&#1607;</div>
             <h2 class="final-title anim-in d1" tabindex="-1">Begin</h2>
-            <p class="final-sub anim-in d2">Enter the roadmap and begin your path,<br><span class="ar">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</span></p>
+            <div class="final-flower anim-in d2" aria-hidden="true">&#10052;</div>
             <div class="enter-wrap anim-in d3">
-              <button class="enter-btn" id="enterBtn">Enter the Roadmap</button>
+              <button class="enter-btn" id="enterBtn">Join the Journey</button>
             </div>
           </div>
         </section>`;
