@@ -50,9 +50,7 @@ body::before{
     radial-gradient(42% 50% at 74% 84%, rgba(129,199,132,.07), transparent 70%),
     radial-gradient(40% 46% at 24% 82%, rgba(206,147,216,.06), transparent 70%),
     #000;
-  animation:bgDrift 34s ease-in-out infinite alternate;
 }
-@keyframes bgDrift{from{transform:translate(-1.5%,-1%) scale(1.02)}to{transform:translate(1.5%,1%) scale(1.05)}}
 
 /* ── DECK + SLIDES ─────────────────────────────────────────── */
 #deck{display:flex;width:100%;height:100dvh;position:relative;z-index:1;
@@ -257,6 +255,18 @@ body::before{
 .video-aspect{position:relative;width:100%;aspect-ratio:16/9;
   border-radius:clamp(9px,1.9vw,14px);overflow:hidden;background:#000}
 .video-aspect .yt{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.video-facade{position:absolute;inset:0;width:100%;height:100%;border:0;cursor:pointer;padding:0;
+  background:#0a0a0a center/cover no-repeat;display:flex;align-items:center;justify-content:center}
+.video-facade::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.12),rgba(0,0,0,.55))}
+.yt-play{position:relative;z-index:1;width:clamp(54px,9vw,76px);height:clamp(54px,9vw,76px);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,rgba(243,217,140,.96),rgba(169,131,31,.96));
+  box-shadow:0 8px 28px -6px rgba(0,0,0,.7),0 0 30px -6px rgba(212,175,55,.6);
+  transition:transform .25s var(--ease),box-shadow .25s ease}
+.video-facade:hover .yt-play,.video-facade:focus-visible .yt-play{transform:scale(1.1);
+  box-shadow:0 10px 36px -6px rgba(0,0,0,.7),0 0 46px -4px rgba(212,175,55,.85)}
+.yt-play svg{width:42%;height:42%;margin-left:8%;fill:#0c0904}
 
 .enter-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
 .enter-btn{display:flex;align-items:center;background:transparent;border:0;outline:0;
@@ -422,7 +432,9 @@ body::before{
             <div class="v-eyebrow anim-in" tabindex="-1">${s.eyebrow}</div>
             <div class="video-frame anim-in d1">
               <div class="video-aspect">
-                <iframe class="yt" data-src="https://www.youtube.com/embed/${s.vid}?rel=0&playsinline=1&modestbranding=1&autoplay=1" title="Motivation" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe>
+                <button class="video-facade" data-vid="${s.vid}" aria-label="Play motivation video" style="background-image:url('https://i.ytimg.com/vi/${s.vid}/maxresdefault.jpg')">
+                  <span class="yt-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+                </button>
               </div>
             </div>
           </div>
@@ -474,6 +486,14 @@ body::before{
   }
   const next=()=>go(index+1,true);
   const prev=()=>go(index-1,true);
+
+  /* ── Motivation video: load the real player only on click (perf + reliable autoplay) ── */
+  document.getElementById('deck').addEventListener('click',(e)=>{
+    const f=e.target.closest('.video-facade'); if(!f) return;
+    const wrap=f.closest('.video-aspect'); if(!wrap) return;
+    const u='https://www.youtube.com/embed/'+f.dataset.vid+'?rel=0&playsinline=1&modestbranding=1&autoplay=1';
+    wrap.innerHTML='<iframe class="yt" data-src="'+u+'" src="'+u+'" title="Motivation" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+  });
 
   function update(userInitiated){
     slides.forEach((s,i)=>{
