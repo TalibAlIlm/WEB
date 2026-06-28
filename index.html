@@ -177,9 +177,6 @@ body::before{
   font-size:clamp(28px,6vw,50px);letter-spacing:.1em;line-height:1.1;margin-bottom:14px}
 .intro-sub{font-size:clamp(10px,2vw,12px);letter-spacing:.26em;text-transform:uppercase;
   color:var(--dim);line-height:1.6}
-.intro-insha{font-family:'Noto Naskh Arabic',serif;
-  font-size:clamp(26px,6vw,46px);line-height:1.4;color:var(--gold);
-  margin-top:clamp(20px,4vw,30px);text-shadow:0 0 30px rgba(212,175,55,.3);direction:rtl}
 
 /* ── FEATURE SLIDES ────────────────────────────────────────── */
 .f-tag{display:inline-block;font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
@@ -268,17 +265,22 @@ body::before{
 .yt-play svg{width:42%;height:42%;margin-left:8%;fill:#0c0904}
 
 .enter-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
-.enter-btn{display:flex;align-items:center;background:transparent;border:0;outline:0;
-  cursor:pointer;color:var(--gold-soft);
+.enter-btn{display:inline-flex;align-items:center;justify-content:center;
+  min-width:11em;height:3.1em;padding:0 1.9em;white-space:nowrap;
+  border-radius:30em;border:none;position:relative;overflow:hidden;z-index:1;cursor:pointer;
   font-family:'Cinzel',serif;font-weight:600;
-  font-size:clamp(14px,2.8vw,18px);letter-spacing:.18em;text-transform:uppercase;
-  line-height:1.5;padding:1rem .25rem;-webkit-tap-highlight-color:transparent;
-  transition:color .3s ease}
-.enter-btn::before{content:"";display:inline-block;height:1.5px;width:0;margin-right:10px;
-  background:var(--gold);border-radius:2px;box-shadow:0 0 10px rgba(212,175,55,.7);
-  transition:all .42s cubic-bezier(.25,.8,.25,1)}
-.enter-btn:hover{color:#fff}
-.enter-btn:hover::before,.enter-btn:focus-visible::before{width:3rem}
+  font-size:clamp(13px,2.6vw,16px);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold-soft);
+  background:linear-gradient(150deg,rgba(255,255,255,.06),rgba(255,255,255,.015)),rgba(17,13,7,.72);
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(212,175,55,.34);
+  -webkit-tap-highlight-color:transparent;
+  transition:color .45s ease,box-shadow .4s ease,transform .2s ease}
+.enter-btn::before{content:'';width:0;height:100%;border-radius:30em;position:absolute;top:0;left:0;
+  background-image:linear-gradient(to right,#a9831f 0%,#D4AF37 42%,#f6e27a 100%);
+  transition:width .5s ease;display:block;z-index:-1}
+.enter-btn:hover::before,.enter-btn:focus-visible::before{width:100%}
+.enter-btn:hover,.enter-btn:focus-visible{color:#0c0904;
+  box-shadow:0 14px 40px -12px rgba(0,0,0,.9),0 0 32px -6px rgba(212,175,55,.6)}
 .enter-btn:active{transform:translateY(1px)}
 .enter-btn:focus-visible{outline:none}
 .enter-hint{font-size:clamp(9px,1.7vw,11px);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
@@ -313,7 +315,7 @@ body::before{
 <body>
 
 <!-- Set data-app-url to your live roadmap (tree) URL so "Enter" navigates there -->
-<div id="deck" aria-live="polite" data-app-url=""></div>
+<div id="deck" aria-live="polite" data-app-url="https://talibalilm.github.io/APP/"></div>
 
 <div id="dots"></div>
 <div id="nav-hint"><span>Swipe</span><span class="arrow">&#8594;</span></div>
@@ -350,6 +352,8 @@ body::before{
 
   const NOTE_ICON='<svg class="fl-ic" viewBox="0 0 24 24"><path d="M14 4l6 6M4 20l1-5L16 4l4 4L9 19l-5 1z"/></svg>';
   const CAL_ICON ='<svg class="fl-ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>';
+  const LAYL_ICON='<svg class="fl-ic" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  const QUWWA_ICON='<svg class="fl-ic" viewBox="0 0 24 24"><path d="M4 9v6M7.5 6.5v11M16.5 6.5v11M20 9v6M7.5 12h9"/></svg>';
 
   /* ── Slide data ── */
   const SLIDES = [
@@ -376,11 +380,16 @@ body::before{
     { type:'feature', corner:'tl', flower:'#22b8d6', title:'Progress Tracking',
       text:'Mark each text {{started or finished}}. Your progress is recorded per text, per level, and across the whole journey.' },
 
+    { type:'feature', corner:'br', flower:'#54c7c0', title:'Offline & Bilingual',
+      text:'The whole roadmap runs {{fully offline}} once opened, and {{saves to your device}} straight from the menu. It comes in {{English and German}} \u2014 switch between them with a single tap.' },
+
     { type:'feature', corner:'tr', flower:'#6fb0d6', title:'Resources & Companions',
-      text:'Every text links to its {{book, PDF, and recorded explanation}}. Two companion apps complete the suite:',
+      text:'Every text links to its {{book, PDF, and recorded explanation}}. Four companion apps complete the suite:',
       links:[
         { label:'Notes',   url:'https://talibalilm.github.io/NOTES/',   icon:NOTE_ICON },
-        { label:'Planner', url:'https://talibalilm.github.io/PLANNER/', icon:CAL_ICON }
+        { label:'Planner', url:'https://talibalilm.github.io/PLANNER/', icon:CAL_ICON },
+        { label:'Layl',    url:'https://talibalilm.github.io/LAYL/',    icon:LAYL_ICON },
+        { label:'QUWWA',   url:'https://talibalilm.github.io/QUWWA/',   icon:QUWWA_ICON }
       ] },
 
     { type:'video',  corner:'bl', flower:'#D4AF37',
@@ -409,7 +418,6 @@ body::before{
             </div>
             <h1 class="intro-title anim-in d1" tabindex="-1">Talib al-&#x02BF;Ilm</h1>
             <div class="intro-sub anim-in d2">An interactive roadmap of the Islamic sciences</div>
-            <div class="intro-insha anim-in d3">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</div>
           </div>
         </section>`;
       }
