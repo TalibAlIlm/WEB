@@ -6,7 +6,7 @@
 <title>Talib al-ʿIlm</title>
 <meta name="description" content="An interactive roadmap of the classical Islamic sciences.">
 <meta name="theme-color" content="#000000">
-<link rel="icon" type="image/png" href="https://i.imgur.com/STz3I9W.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1a1e'/%3E%3Crect x='150' y='150' width='212' height='212' fill='none' stroke='%23d4af37' stroke-width='13'/%3E%3Crect x='150' y='150' width='212' height='212' fill='none' stroke='%23d4af37' stroke-width='13' transform='rotate(45 256 256)'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="https://i.imgur.com/STz3I9W.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -310,6 +310,14 @@ body::before{
   .branch .flower{opacity:1;transform:scale(1)}
   .branch .leaf{opacity:.7}
 }
+#lang-btn{position:fixed;top:max(16px,env(safe-area-inset-top));right:clamp(16px,4vw,30px);z-index:60;
+  font-family:inherit;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
+  color:var(--gold-soft);background:rgba(18,16,12,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(212,175,55,.30);border-radius:30px;padding:7px 14px;cursor:pointer;
+  transition:border-color .2s,color .2s,box-shadow .2s}
+#lang-btn:hover,#lang-btn:focus-visible{border-color:var(--gold);color:var(--gold);outline:none;
+  box-shadow:0 6px 20px -8px rgba(212,175,55,.5)}
+@media (prefers-reduced-motion: reduce){ #lang-btn{transition:none} }
 </style>
 </head>
 <body>
@@ -319,6 +327,7 @@ body::before{
 
 <div id="dots"></div>
 <div id="nav-hint"><span>Swipe</span><span class="arrow">&#8594;</span></div>
+<button id="lang-btn" type="button"></button>
 
 <script>
 "use strict";
@@ -327,6 +336,30 @@ body::before{
   const CONFIG = {
     TYPE_SPEED:24, FIRST_DELAY:140, NEXT_DELAY:60, WHEEL_COOLDOWN:950, APP_URL:''
   };
+
+  /* ── i18n (EN / DE) ── */
+  const HUB_LANG_KEY='talib_hub_lang';
+  let LANG=(function(){try{const l=localStorage.getItem(HUB_LANG_KEY);if(l==='en'||l==='de')return l;return (navigator.language||'en').slice(0,2)==='de'?'de':'en';}catch(e){return 'en';}})();
+  try{document.documentElement.lang=LANG;}catch(e){}
+  const TXT={
+    en:{introSub:"An interactive roadmap of the Islamic sciences",beginPre:"Begin",join:"Join the Journey",vnote:"Shared for this reminder only \u2014 channel not vetted.",varia:"Watch the motivation video on YouTube",swipe:"Swipe",toggle:"DE",toglabel:"Auf Deutsch wechseln"},
+    de:{introSub:"Ein interaktiver Wegweiser der islamischen Wissenschaften",beginPre:"Beginne",join:"Tritt der Reise bei",vnote:"Nur f\u00fcr diese Erinnerung geteilt \u2014 Kanal nicht gepr\u00fcft.",varia:"Das Motivationsvideo auf YouTube ansehen",swipe:"Wischen",toggle:"EN",toglabel:"Switch to English"}
+  };
+  const TX=TXT[LANG];
+  const DE_FEAT={
+    "The Knowledge Tree":{title:"Der Wissensbaum",text:"Ein strukturierter Wegweiser \u00fcber {{sechs Stufen}}, von den ersten Schritten bis zur Meisterschaft. Jede Stufe verzweigt sich in ihre Wissenschaften und die darin studierten Texte."},
+    "Qur'an Memorization":{title:"Qur\u2019an-Memorierung",text:"Die {{drei\u00dfig Juz\u02be}} sind \u00fcber die Stufen verteilt und werden einzeln erfasst, sobald jeder auswendig gelernt ist, {{ar:\u0625\u0646 \u0634\u0627\u0621 \u0627\u0644\u0644\u0647}}."},
+    "Four Schools of Fiqh":{title:"Vier Rechtsschulen",text:"Der Wegweiser unterst\u00fctzt die Schulen {{Hanbali|#81c784}}, {{Sch\u0101fi\u02bf\u012b|#64b5f6}}, {{M\u0101lik\u012b|#ce93d8}} und {{Hanaf\u012b|#ff8a65}} \u2014 die Wahl einer Schule filtert die Fiqh-Texte entsprechend, w\u00e4hrend jede gemeinsame Wissenschaft sichtbar bleibt."},
+    "Specializations":{title:"Spezialisierungen",text:"W\u00e4hle einen oder mehrere {{takha\u1e63\u1e63u\u1e63}}-Schwerpunkte \u2014 \u02bfaq\u012bda, \u1e25ad\u012bth, fiqh, tafs\u012br, s\u012bra oder Arabisch. Jeder f\u00fcgt seine weiterf\u00fchrenden Texte zu deinem {{Memorierplan}} hinzu; der Kern bleibt f\u00fcr alle."},
+    "Spaced Repetition":{title:"Verteiltes Wiederholen",text:"Zur Memorierung markierte Texte gelangen in einen {{Wiederholungsplan}} mit gr\u00f6\u00dfer werdenden Abst\u00e4nden \u2014 und wenn sie f\u00e4llig sind, ruft dich ein dezentes Abzeichen zur Wiederholung zur\u00fcck."},
+    "\u1e24if\u1e93 Mode":{title:"\u1e24if\u1e93-Modus",text:"Eine eigene {{\u1e24if\u1e93-Ansicht}} sammelt jeden Text, den du memorierst \u2014 und zeigt, was gesichert ist und was {{heute zur Wiederholung ansteht}}, alles auf einem fokussierten Bildschirm."},
+    "Progress Tracking":{title:"Fortschritt verfolgen",text:"Markiere jeden Text als {{begonnen oder abgeschlossen}}. Dein Fortschritt wird pro Text, pro Stufe und \u00fcber die gesamte Reise erfasst."},
+    "Offline & Bilingual":{title:"Offline & Zweisprachig",text:"Der gesamte Wegweiser l\u00e4uft nach dem \u00d6ffnen {{vollst\u00e4ndig offline}} und {{speichert auf deinem Ger\u00e4t}} direkt aus dem Men\u00fc. Er ist auf {{Englisch und Deutsch}} verf\u00fcgbar \u2014 wechsle mit einem einzigen Tippen."},
+    "Resources & Companions":{title:"Ressourcen & Begleiter",text:"Jeder Text verlinkt auf sein {{Buch, PDF und die aufgezeichnete Erkl\u00e4rung}}. Vier Begleiter vervollst\u00e4ndigen die Suite: {{Faw\u0101id}}, um die Nutzen und Erkl\u00e4rungen deines Shaykhs festzuhalten, {{Miq\u0101t}}, um deinen Tag um die Gebete herum zu ordnen, {{Layl}} f\u00fcr die Zeiten der Nacht und ihr letztes Drittel, und {{QUWWA}}, um deine Kraft zu protokollieren."}
+  };
+  const DE_MISC={"Before You Begin":"Bevor du beginnst"};
+  function L(s,k){ if(LANG!=='de')return s[k]; if(k==='eyebrow')return DE_MISC[s.eyebrow]||s.eyebrow; const d=DE_FEAT[s.title]; return (d&&d[k]!=null)?d[k]:s[k]; }
+
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AR = /[\u0600-\u06FF]/;
 
@@ -360,7 +393,7 @@ body::before{
     { type:'intro',  corner:'tl', flower:'#D4AF37' },
 
     { type:'feature', corner:'tr', flower:'#64b5f6', title:'The Knowledge Tree',
-      text:'A structured roadmap of {{six levels}}, from your first steps to more advanced specializations. Each level branches into its sciences and the texts studied within them.' },
+      text:'A structured roadmap of {{six levels}}, from your first steps to mastery. Each level branches into its sciences and the texts studied within them.' },
 
     { type:'feature', corner:'bl', flower:'#69f0ae', title:"Qur'an Memorization",
       text:'The {{thirty juz}} are distributed across the levels and tracked individually as each is committed to memory, {{ar:إن شاء الله}}.' },
@@ -384,7 +417,7 @@ body::before{
       text:'The whole roadmap runs {{fully offline}} once opened, and {{saves to your device}} straight from the menu. It comes in {{English and German}} \u2014 switch between them with a single tap.' },
 
     { type:'feature', corner:'tr', flower:'#6fb0d6', title:'Resources & Companions',
-      text:'Some of the works links to its {{book, PDF, and recorded explanation}}. Four companions complete the suite: {{FAWĀID}} to record the benefits and explanations of your Shaykh, {{MIQĀT}} to order your day around the prayers, {{LAYL}} for the times of the night and its last third, and {{QUWWA}} to log your physical strength.' },
+      text:'Every text links to its {{book, PDF, and recorded explanation}}. Four companions complete the suite: {{Fawāid}} to record the benefits and explanations of your Shaykh, {{Miqāt}} to order your day around the prayers, {{Layl}} for the times of the night and its last third, and {{QUWWA}} to log your strength.' },
 
     { type:'video',  corner:'bl', flower:'#D4AF37',
       eyebrow:'Before You Begin', vid:'N0drwM9yhTs' },
@@ -411,7 +444,7 @@ body::before{
               <div class="profile-container"><img src="https://i.imgur.com/STz3I9W.png" alt="Talib al-Ilm" decoding="async" width="200" height="200"></div>
             </div>
             <h1 class="intro-title anim-in d1" tabindex="-1">Talib al-&#x02BF;Ilm</h1>
-            <div class="intro-sub anim-in d2">An interactive roadmap of the Islamic sciences</div>
+            <div class="intro-sub anim-in d2">${TX.introSub}</div>
           </div>
         </section>`;
       }
@@ -419,10 +452,10 @@ body::before{
         return `<section class="slide" data-type="final">${br}
           <div class="inner">
             <div class="seal anim-in">&#1575;&#1604;&#1581;&#1605;&#1583; &#1604;&#1604;&#1607;</div>
-            <h2 class="final-title anim-in d1" tabindex="-1">Begin <span class="insha-w">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</span></h2>
+            <h2 class="final-title anim-in d1" tabindex="-1">${TX.beginPre} <span class="insha-w">&#1573;&#1606; &#1588;&#1575;&#1569; &#1575;&#1604;&#1604;&#1607;</span></h2>
             <div class="final-flower anim-in d2" aria-hidden="true">&#10048;</div>
             <div class="enter-wrap anim-in d3">
-              <button class="enter-btn" id="enterBtn">Join the Journey</button>
+              <button class="enter-btn" id="enterBtn">${TX.join}</button>
             </div>
           </div>
         </section>`;
@@ -430,15 +463,15 @@ body::before{
       if(s.type==='video'){
         return `<section class="slide" data-type="video">
           <div class="inner inner-wide">
-            <div class="v-eyebrow anim-in" tabindex="-1">${s.eyebrow}</div>
+            <div class="v-eyebrow anim-in" tabindex="-1">${L(s,'eyebrow')}</div>
             <div class="video-frame anim-in d1">
               <div class="video-aspect">
-                <a class="video-facade" href="https://www.youtube.com/watch?v=${s.vid}" target="_blank" rel="noopener" aria-label="Watch the motivation video on YouTube" style="background-image:url('https://i.ytimg.com/vi/${s.vid}/maxresdefault.jpg')">
+                <a class="video-facade" href="https://www.youtube.com/watch?v=${s.vid}" target="_blank" rel="noopener" aria-label="${TX.varia}" style="background-image:url('https://i.ytimg.com/vi/${s.vid}/maxresdefault.jpg')">
                   <span class="yt-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
                 </a>
               </div>
             </div>
-            <div class="v-note anim-in d2">Shared for this reminder only — channel not vetted.</div>
+            <div class="v-note anim-in d2">${TX.vnote}</div>
           </div>
         </section>`;
       }
@@ -451,8 +484,8 @@ body::before{
       return `<section class="slide" data-type="feature">${br}
         <div class="inner">
           ${tag}
-          <h2 class="${titleCls}" tabindex="-1">${s.title}</h2>
-          <p class="f-text tw" data-tw="${escapeAttr(s.text)}"></p>
+          <h2 class="${titleCls}" tabindex="-1">${L(s,'title')}</h2>
+          <p class="f-text tw" data-tw="${escapeAttr(L(s,'text'))}"></p>
           ${links}
         </div>
       </section>`;
@@ -477,6 +510,12 @@ body::before{
   });
   const dots = Array.from(dotsEl.children);
   const navHint = document.getElementById('nav-hint');
+  (function(){
+    var sw=document.querySelector('#nav-hint span'); if(sw) sw.textContent=TX.swipe;
+    var lb=document.getElementById('lang-btn');
+    if(lb){ lb.textContent=TX.toggle; lb.setAttribute('aria-label',TX.toglabel);
+      lb.addEventListener('click',function(){ try{localStorage.setItem(HUB_LANG_KEY, LANG==='en'?'de':'en');}catch(e){} location.reload(); }); }
+  })();
 
   /* ── Navigation ── */
   function go(n, userInitiated){
