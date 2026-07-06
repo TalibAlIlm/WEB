@@ -91,6 +91,18 @@ body::before{
 .slide.active .anim-in.d3{transition-delay:.34s}
 .slide.active .anim-in.d4{transition-delay:.46s}
 
+/* ────────────────────────────────────────────────────────────
+   FAILSAFE REVEAL — guarantees content is visible even if a rule
+   above is broken (e.g. by stray non-breaking spaces from an
+   editor) or the entrance transition never fires. Toggled by JS.
+──────────────────────────────────────────────────────────── */
+body.reveal-all .anim-in{opacity:1 !important;transform:none !important}
+body.reveal-all .tw .c{opacity:1 !important}
+body.reveal-all .slide .inner{opacity:1 !important}
+body.reveal-all .branch .stem{stroke-dashoffset:0 !important}
+body.reveal-all .branch .flower{opacity:1 !important;transform:scale(1) !important}
+body.reveal-all .branch .leaf{opacity:.7 !important}
+
 /* ════════════════════════════════════════════════════════════
    ORGANIC TREE BRANCH — grows from a slide corner, ends in a flower.
 ════════════════════════════════════════════════════════════ */
@@ -103,9 +115,13 @@ body::before{
 .branch.bl{bottom:0;left:0}
 .branch.br{bottom:0;right:0;transform:scaleX(-1)}
 
+/* pathLength is set as an ATTRIBUTE in the markup (pathLength="1"),
+   because it is NOT a valid CSS property and browsers ignore it in CSS.
+   With the attribute present, dasharray:1 / dashoffset:1 hides the stem
+   until the grow animation runs. */
 .branch .stem{
   fill:none;stroke:var(--flower);stroke-width:1.6;stroke-linecap:round;
-  opacity:.55;pathLength:1;stroke-dasharray:1;stroke-dashoffset:1;
+  opacity:.55;stroke-dasharray:1;stroke-dashoffset:1;
 }
 .branch .leaf{fill:var(--flower);opacity:0}
 .branch .petal{fill:var(--flower)}
@@ -292,12 +308,34 @@ body::before{
   border:none;padding:0;transition:all .4s var(--ease)}
 #dots .dot.active{background:var(--gold);box-shadow:0 0 10px rgba(212,175,55,.6);transform:scale(1.25)}
 
-#nav-hint{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));right:clamp(20px,4vw,38px);
-  font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);z-index:50;
-  display:flex;align-items:center;gap:9px;opacity:0;transition:opacity .5s ease}
-#nav-hint.show{opacity:1}
-#nav-hint .arrow{animation:nudge 1.8s ease-in-out infinite}
-@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+/* ── SWIPE CUE — prominent, bilingual, self-dismissing ─────── */
+#swipe-cue{position:fixed;left:50%;
+  bottom:calc(max(20px,env(safe-area-inset-bottom)) + 34px);
+  transform:translateX(-50%);z-index:55;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;transition:opacity .55s ease}
+#swipe-cue.show{opacity:1}
+.sc-chevs{display:flex;align-items:center;gap:1px;height:26px}
+.sc-chev{font-family:'IBM Plex Mono',monospace;font-size:30px;line-height:1;color:var(--gold);
+  text-shadow:0 0 14px rgba(212,175,55,.6);opacity:.18;
+  animation:scPulse 1.5s var(--ease) infinite}
+.sc-chev:nth-child(2){animation-delay:.16s}
+.sc-chev:nth-child(3){animation-delay:.32s}
+@keyframes scPulse{0%,100%{opacity:.18;transform:translateX(0)}50%{opacity:1;transform:translateX(5px)}}
+.sc-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;
+  text-transform:uppercase;font-weight:500;color:var(--gold-soft);
+  padding:6px 16px;border:1px solid rgba(212,175,55,.34);border-radius:30px;
+  background:rgba(18,16,12,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  box-shadow:0 6px 20px -10px rgba(0,0,0,.8)}
+
+/* Pulsing chevron pinned to the right edge — points where to go next */
+#edge-arrow{position:fixed;right:clamp(6px,2.4vw,16px);top:50%;z-index:55;pointer-events:none;
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  transform:translateY(-50%);opacity:0;transition:opacity .55s ease}
+#edge-arrow.show{opacity:1;animation:edgeNudge 1.5s ease-in-out infinite}
+#edge-arrow svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:2.5;
+  stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 9px rgba(212,175,55,.65))}
+@keyframes edgeNudge{0%,100%{transform:translateY(-50%) translateX(0)}50%{transform:translateY(-50%) translateX(7px)}}
 
 @media (prefers-reduced-motion: reduce){
   .glow-aura,.orbit-ring,.dust{display:none}
@@ -309,6 +347,8 @@ body::before{
   .branch .stem{stroke-dashoffset:0}
   .branch .flower{opacity:1;transform:scale(1)}
   .branch .leaf{opacity:.7}
+  .sc-chev,#edge-arrow.show{animation:none}
+  .sc-chev{opacity:.85}
 }
 #lang-btn{position:fixed;top:max(16px,env(safe-area-inset-top));right:clamp(16px,4vw,30px);z-index:60;
   font-family:inherit;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
@@ -326,12 +366,22 @@ body::before{
 <div id="deck" aria-live="polite" data-app-url="https://talibalilm.github.io/APP/"></div>
 
 <div id="dots"></div>
-<div id="nav-hint"><span>Swipe</span><span class="arrow">&#8594;</span></div>
+
+<!-- Prominent swipe affordance -->
+<div id="swipe-cue" aria-hidden="true">
+  <div class="sc-chevs"><span class="sc-chev">›</span><span class="sc-chev">›</span><span class="sc-chev">›</span></div>
+  <div class="sc-label" id="sc-label">Swipe</div>
+</div>
+<div id="edge-arrow" aria-hidden="true">
+  <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+</div>
+
 <button id="lang-btn" type="button"></button>
 
 <script>
 "use strict";
 (function(){
+try{
   /* ── Config ── */
   const CONFIG = {
     TYPE_SPEED:24, FIRST_DELAY:140, NEXT_DELAY:60, WHEEL_COOLDOWN:950, APP_URL:''
@@ -355,7 +405,7 @@ body::before{
     "\u1e24if\u1e93 Mode":{title:"\u1e24if\u1e93-Modus",text:"Eine eigene {{\u1e24if\u1e93-Ansicht}} sammelt jeden Text, den du memorierst \u2014 und zeigt, was {{in Wiederholung ist}} und was {{heute zur Wiederholung ansteht}}, alles in einer spezifischen Ansicht."},
     "Progress Tracking":{title:"Fortschritt verfolgen",text:"Markiere jeden Text als {{begonnen oder abgeschlossen}}. Dein Fortschritt wird pro Text, pro Stufe und \u00fcber die gesamte Reise erfasst."},
     "Offline & Bilingual":{title:"Offline & Zweisprachig",text:"Der gesamte Wegweiser l\u00e4uft nach dem \u00d6ffnen {{vollst\u00e4ndig offline}} und {{speichert auf deinem Ger\u00e4t}} direkt aus dem Men\u00fc. Er ist auf {{Englisch und Deutsch}} verf\u00fcgbar \u2014 wechsle mit einem einzigen Tippen."},
-    "Resources & Companions":{title:"Ressourcen & Apps",text:"Texte sind mit dem jeweiligen {{Buch, PDF und die aufgezeichnete Lesung}} verfügbar. Vier Begleiter begleiten dich auf deiner edlen Reise: {{FAW\u0100ID}}, um die Nutzen und Erkl\u00e4rungen deines Shaykhs festzuhalten, {{MIQ\u0100T}}, um deinen Tag um die Gebete herum zu ordnen, {{LAYL}} f\u00fcr die Zeiten der Nacht und ihr letztes Drittel, und {{QUWWA}}, um deine physische Leistung zu aufzuzeichnen."}
+    "Resources & Companions":{title:"Ressourcen & Apps",text:"Texte sind mit dem jeweiligen {{Buch, PDF und die aufgezeichnete Lesung}} verf\u00fcgbar. Vier Begleiter begleiten dich auf deiner edlen Reise: {{FAW\u0100ID}}, um die Nutzen und Erkl\u00e4rungen deines Shaykhs festzuhalten, {{MIQ\u0100T}}, um deinen Tag um die Gebete herum zu ordnen, {{LAYL}} f\u00fcr die Zeiten der Nacht und ihr letztes Drittel, und {{QUWWA}}, um deine physische Leistung aufzuzeichnen."}
   };
   const DE_MISC={"Before You Begin":"Bevor du beginnst"};
   function L(s,k){ if(LANG!=='de')return s[k]; if(k==='eyebrow')return DE_MISC[s.eyebrow]||s.eyebrow; const d=DE_FEAT[s.title]; return (d&&d[k]!=null)?d[k]:s[k]; }
@@ -363,11 +413,12 @@ body::before{
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AR = /[\u0600-\u06FF]/;
 
-  /* Reusable organic branch */
+  /* Reusable organic branch — note pathLength="1" as an ATTRIBUTE (valid),
+     not a CSS property (which browsers ignore). */
   const BRANCH = `<svg class="branch __CORNER__" viewBox="0 0 300 300" style="--flower:__COLOR__" aria-hidden="true">
-      <path class="stem" d="M8,292 C46,250 64,214 96,184 C128,154 152,126 182,86"/>
-      <path class="stem" d="M96,184 C104,160 124,150 150,150"/>
-      <path class="stem" d="M150,150 C156,128 150,108 162,92"/>
+      <path class="stem" pathLength="1" d="M8,292 C46,250 64,214 96,184 C128,154 152,126 182,86"/>
+      <path class="stem" pathLength="1" d="M96,184 C104,160 124,150 150,150"/>
+      <path class="stem" pathLength="1" d="M150,150 C156,128 150,108 162,92"/>
       <ellipse class="leaf l1" cx="150" cy="150" rx="13" ry="6" transform="rotate(18 150 150)"/>
       <ellipse class="leaf l2" cx="162" cy="92" rx="11" ry="5" transform="rotate(-28 162 92)"/>
       <g transform="translate(182,84)">
@@ -383,6 +434,9 @@ body::before{
     </svg>`;
   function branch(corner,color){ return BRANCH.replace('__CORNER__',corner).replace('__COLOR__',color); }
 
+  /* Fallback emblem (gold diamond) if the remote profile image is blocked/unavailable */
+  const EMBLEM_FALLBACK="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231a1a1e'/%3E%3Crect x='150' y='150' width='212' height='212' fill='none' stroke='%23d4af37' stroke-width='13'/%3E%3Crect x='150' y='150' width='212' height='212' fill='none' stroke='%23d4af37' stroke-width='13' transform='rotate(45 256 256)'/%3E%3C/svg%3E";
+
   const NOTE_ICON='<svg class="fl-ic" viewBox="0 0 24 24"><path d="M14 4l6 6M4 20l1-5L16 4l4 4L9 19l-5 1z"/></svg>';
   const CAL_ICON ='<svg class="fl-ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>';
   const LAYL_ICON='<svg class="fl-ic" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
@@ -396,19 +450,19 @@ body::before{
       text:'A structured roadmap of {{six levels}}, from your first steps to mastery. Each level branches into its sciences and the texts studied within them.' },
 
     { type:'feature', corner:'bl', flower:'#69f0ae', title:"Qur'an Memorization",
-      text:'The {{thirty juz}} are distributed across the levels and tracked individually as each is committed to memory, {{ar:إن شاء الله}}.' },
+      text:'The {{thirty juz}} are distributed across the levels and tracked individually as each is committed to memory, {{ar:\u0625\u0646 \u0634\u0627\u0621 \u0627\u0644\u0644\u0647}}.' },
 
     { type:'feature', corner:'br', flower:'#ce93d8', title:'Four Schools of Fiqh',
-      text:"The roadmap supports the {{Hanbali|#81c784}}, {{Shafi'i|#64b5f6}}, {{Maliki|#ce93d8}}, and {{Hanafi|#ff8a65}} schools — choosing one filters the fiqh texts to it, while every shared science stays visible." },
+      text:"The roadmap supports the {{Hanbali|#81c784}}, {{Shafi'i|#64b5f6}}, {{Maliki|#ce93d8}}, and {{Hanafi|#ff8a65}} schools \u2014 choosing one filters the fiqh texts to it, while every shared science stays visible." },
 
     { type:'feature', corner:'tl', flower:'#f0b357', title:'Specializations',
-      text:'Choose one or more {{takhaṣṣuṣ}} tracks — ʿaqīdah, ḥadīth, fiqh, tafsīr, sīrah, or Arabic. Each adds its advanced texts to your {{memorization plan}}; the core remains for everyone.' },
+      text:'Choose one or more {{takha\u1e63\u1e63u\u1e63}} tracks \u2014 \u02bfaq\u012bdah, \u1e25ad\u012bth, fiqh, tafs\u012br, s\u012brah, or Arabic. Each adds its advanced texts to your {{memorization plan}}; the core remains for everyone.' },
 
     { type:'feature', corner:'tr', flower:'#e06b9c', title:'Spaced Repetition',
-      text:'Texts marked for memorization enter a {{review schedule}} at widening intervals — and when they fall due, a quiet badge calls you back to revise.' },
+      text:'Texts marked for memorization enter a {{review schedule}} at widening intervals \u2014 and when they fall due, a quiet badge calls you back to revise.' },
 
-    { type:'feature', corner:'bl', flower:'#7fd1ae', title:'Ḥifẓ Mode',
-      text:'A dedicated {{ḥifẓ view}} gathers every text you are memorizing — showing what is secured and what is {{due for review today}}, all in one focused screen.' },
+    { type:'feature', corner:'bl', flower:'#7fd1ae', title:'\u1e24if\u1e93 Mode',
+      text:'A dedicated {{\u1e25if\u1e93 view}} gathers every text you are memorizing \u2014 showing what is secured and what is {{due for review today}}, all in one focused screen.' },
 
     { type:'feature', corner:'tl', flower:'#22b8d6', title:'Progress Tracking',
       text:'Mark each text {{started or finished}}. Your progress is recorded per text, per level, and across the whole journey.' },
@@ -417,7 +471,7 @@ body::before{
       text:'The whole roadmap runs {{fully offline}} once opened, and {{saves to your device}} straight from the menu. It comes in {{English and German}} \u2014 switch between them with a single tap.' },
 
     { type:'feature', corner:'tr', flower:'#6fb0d6', title:'Resources & Companions',
-      text:'Every text links to its {{book, PDF, and recorded explanation}}. Four companions complete the suite: {{Fawāid}} to record the benefits and explanations of your Shaykh, {{Miqāt}} to order your day around the prayers, {{Layl}} for the times of the night and its last third, and {{QUWWA}} to log your strength.' },
+      text:'Every text links to its {{book, PDF, and recorded explanation}}. Four companions complete the suite: {{Faw\u0101id}} to record the benefits and explanations of your Shaykh, {{Miq\u0101t}} to order your day around the prayers, {{Layl}} for the times of the night and its last third, and {{QUWWA}} to log your strength.' },
 
     { type:'video',  corner:'bl', flower:'#D4AF37',
       eyebrow:'Before You Begin', vid:'N0drwM9yhTs' },
@@ -441,7 +495,7 @@ body::before{
               <div class="orbit-ring orbit-inner"></div>
               <div class="dust dust-1"></div><div class="dust dust-2"></div>
               <div class="dust dust-3"></div><div class="dust dust-4"></div>
-              <div class="profile-container"><img src="https://i.imgur.com/STz3I9W.png" alt="Talib al-Ilm" decoding="async" width="200" height="200"></div>
+              <div class="profile-container"><img src="https://i.imgur.com/STz3I9W.png" alt="Talib al-Ilm" decoding="async" width="200" height="200" onerror="this.onerror=null;this.src='${EMBLEM_FALLBACK}';this.style.transform='scale(1)';"></div>
             </div>
             <h1 class="intro-title anim-in d1" tabindex="-1">Talib al-&#x02BF;Ilm</h1>
             <div class="intro-sub anim-in d2">${TX.introSub}</div>
@@ -497,6 +551,7 @@ body::before{
   const slides = Array.from(deck.querySelectorAll('.slide'));
   const total  = slides.length;
   let index = 0;
+  let interacted = false;
   const typed = new Set();
 
   /* ── Dots ── */
@@ -509,18 +564,54 @@ body::before{
     dotsEl.appendChild(d);
   });
   const dots = Array.from(dotsEl.children);
-  const navHint = document.getElementById('nav-hint');
+
+  /* ── Swipe cue + language button wiring ── */
+  const swipeCue = document.getElementById('swipe-cue');
+  const edgeArrow = document.getElementById('edge-arrow');
   (function(){
-    var sw=document.querySelector('#nav-hint span'); if(sw) sw.textContent=TX.swipe;
+    var lbl=document.getElementById('sc-label'); if(lbl) lbl.textContent=TX.swipe;
     var lb=document.getElementById('lang-btn');
     if(lb){ lb.textContent=TX.toggle; lb.setAttribute('aria-label',TX.toglabel);
       lb.addEventListener('click',function(){ try{localStorage.setItem(HUB_LANG_KEY, LANG==='en'?'de':'en');}catch(e){} location.reload(); }); }
   })();
 
+  function updateCues(){
+    // Show the intro swipe cue until the visitor navigates once; show the
+    // edge chevron whenever there is a slide to the right and they haven't moved yet.
+    const showSwipe = !interacted && index <= 1;
+    const showEdge  = !interacted && index < total-1;
+    if(swipeCue)  swipeCue.classList.toggle('show', showSwipe);
+    if(edgeArrow) edgeArrow.classList.toggle('show', showEdge);
+  }
+
+  /* ── Failsafe: guarantee the active slide's content is visible even if a
+       CSS rule was corrupted (e.g. stray non-breaking spaces) ── */
+  function forceReveal(slide){
+    if(!slide) return;
+    slide.querySelectorAll('.anim-in').forEach(function(el){ el.style.opacity='1'; el.style.transform='none'; });
+    slide.querySelectorAll('.tw').forEach(function(el){
+      // If the typewriter never ran, show the plain text.
+      if(!el.querySelector('.c')) el.textContent = (el.getAttribute('data-tw')||'').replace(/\{\{ar:|\{\{|\}\}|\|#[0-9a-fA-F]{3,8}/g,'');
+    });
+    slide.querySelectorAll('.tw .c').forEach(function(c){ c.classList.add('on'); });
+  }
+  function failsafeCheck(slide){
+    if(!slide || !slide.classList.contains('active')) return;
+    var probe = slide.querySelector('.anim-in');
+    if(!probe) return;
+    var op = 1;
+    try{ op = parseFloat(getComputedStyle(probe).opacity || '1'); }catch(e){}
+    if(!(op > 0.05)){
+      document.body.classList.add('reveal-all');
+      forceReveal(slide);
+    }
+  }
+
   /* ── Navigation ── */
   function go(n, userInitiated){
     n=Math.max(0,Math.min(total-1,n));
-    if(n===index && userInitiated!=='init') return;
+    if(userInitiated===true) interacted=true;
+    if(n===index && userInitiated!=='init'){ updateCues(); return; }
     index=n;
     deck.style.transform=`translateX(${-100*index}vw) translateZ(0)`;
     update(userInitiated);
@@ -536,8 +627,11 @@ body::before{
       if('inert' in HTMLElement.prototype){ s.inert=!on; }
     });
     dots.forEach((d,i)=>d.classList.toggle('active',i===index));
-    navHint.classList.toggle('show',index===0);
+    updateCues();
     if(!typed.has(index)) typeSlide(slides[index]);
+    // Verify the newly-active slide actually rendered its text.
+    var activeSlide = slides[index];
+    setTimeout(function(){ failsafeCheck(activeSlide); }, 1200);
     if(userInitiated===true){
       const h=slides[index].querySelector('[tabindex="-1"]');
       if(h) h.focus({preventScroll:true});
@@ -651,17 +745,26 @@ body::before{
 
   go(0,'init');
 
+  /* Belt-and-braces: if fonts/CSS are slow or a rule is broken, make sure the
+     first slide's text is on screen shortly after load. */
+  window.addEventListener('load',function(){ setTimeout(function(){ failsafeCheck(slides[index]); },1500); });
+
   /* ── Press-to-enter ── */
   const enterBtn=document.getElementById('enterBtn');
   if(enterBtn){
     enterBtn.addEventListener('click',()=>{
       if(CONFIG.APP_URL){ window.location.href=CONFIG.APP_URL; return; }
-      // No URL configured yet — gentle acknowledgement
       if(enterBtn.animate){
         enterBtn.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:260,easing:'ease'});
       }
     });
   }
+
+}catch(err){
+  // Absolute last resort: reveal everything so text is never invisible.
+  try{ document.body.classList.add('reveal-all'); }catch(e){}
+  if(window.console && console.error) console.error('[Talib hub] init error:', err);
+}
 })();
 </script>
 </body>
